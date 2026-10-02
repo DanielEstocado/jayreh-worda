@@ -1,4 +1,4 @@
-# jayreh-web-app-template: Conventions
+﻿# jayreh-web-app-template: Conventions
 
 React 19 + Vite + TypeScript + Tailwind v4 web app template. `config/`, `hooks/useApi.ts`,
 `lib/`, `validations/`, `services/queries/` + `services/mutations/`, and `zustand/` are already
@@ -88,14 +88,27 @@ Typeface is a separate class from size, on purpose, so the two compose freely:
 
 - `title`: Poppins (via `@fontsource/poppins`), the brand's display face. Bold and geometric,
   good for a short headline, bad for a paragraph.
-- `subtitle`: Inter (via `@fontsource-variable/inter`), the readable default for everything
-  else. It's also what the page already inherits without any class, write it explicitly anyway
-  on real body/subtitle text so the choice is visible at the call site, not implicit.
+- `subtitle`: currently also Poppins, as an experiment to see how the whole app looks in one face.
+  To go back to Inter (`@fontsource-variable/inter`, still imported in `main.tsx`), change
+  `--font-subtitle` in `index.css` back to `"Inter Variable", "Inter", sans-serif`, nothing else needs
+  to change. Write `subtitle` explicitly on body text so the choice is visible at the call site.
 
 Both fonts are self-hosted, imported once in `main.tsx`. Poppins only ships specific static
-weights (not a variable font), the template pulls in 400/500/600/700 since that covers every
+weights (not a variable font), this project pulls in 400/500/600/700 plus 800 for the extra-bold logo, since that covers every
 `font-weight` the current type scale and components use, add another weight import there only if
 a new size/weight combination actually needs it.
+
+Use the two classes by role, not by habit, and build hierarchy from size, weight and shade together:
+
+- `title` for what a reader scans first: names, headings, tab and nav labels, numbers, buttons. Bold
+  or semibold, full-strength `text-foreground`.
+- `subtitle` for what supports it: descriptions, body copy, meta. Regular weight, and a softer shade:
+  `text-foreground/70` for readable supporting text, `text-muted-foreground` for secondary labels,
+  `text-muted-foreground/70` for the quietest meta (audience line, points, placeholders).
+- Rank by size and weight: a post goes author name (`title text-body`), headline (`subtitle text-body`
+  medium weight in `text-foreground/85`, an off-black, never pure black), then
+  supporting text (`subtitle text-body`), then meta (`subtitle text-caption`). Never use one size and
+  shade for everything.
 
 `className="text-h1 title"` and `className="text-h1 subtitle"` are both valid, same size,
 different typeface. Never bake a font-family into one of the `text-*` size classes, that's
@@ -107,10 +120,36 @@ The route table lives in `routes/routes.config.ts`. Current flow:
 
 - `/` redirects (`<Navigate replace>`) straight to `/home`, there's no real content at the bare
   root, don't add any.
-- `/home` (`screens/home/HomeScreen.tsx`), the landing page. A centered hero (headline, pitch,
-  two CTAs) plus a single "Color tokens" card previewing the theme's brand/state colors. Its
-  "About this template" button is the one way into `/about`. Keep this screen a pitch, not a
-  style guide, if a new design-system card needs demonstrating, it belongs on About, not here.
+- `/home` (`screens/home/HomeScreen.tsx`), the feed. A floating round button (bottom-right, plus icon only) opens a "New post" dialog (title,
+  subtitle, Public or My groups, `validations/post.ts`) that adds the post to the store, there is no
+  inline composer. `My Groups` / `Public` tabs (posts aimed at the user's departments, sections and clusters, and
+  posts for everyone), each listing only posts the user is allowed to see (`lib/post.ts`
+  `canSeePost`), newest first. Likes and pins are global state in
+  `zustand/slices/postSlice.ts`, read through `hooks/usePostInteractions.ts`, so Home and Profile
+  always agree.
+- `/profile` (`screens/profile/ProfileScreen.tsx`), the signed-in user: avatar, tags, a derived
+  Mentor badge (finished C2S101), where they serve, stats, then compact game-style cards for every activity (a ring that fills as lessons are done, not started ones greyed out,
+  `hooks/useMyActivityProgress.ts`, a finished enrollment always reads 100%), then `Posts` and `Pinned` tabs. Pins are
+  private to the user and a pinned post the user can no longer see is skipped, never shown.
+- `/activities` and `/activities/:activityId` (`screens/activities/`), "My Activities": every
+  activity as a big neutral card, one per row, only the progress ring is colored and it sits on the
+  right (`CustomActivityList variant="large"`, Profile uses the compact tinted variant), not started
+  ones greyed out, and one ongoing activity module by module (done, current, locked). Progress is never stored,
+  `lib/progress.ts` derives it from completed lessons.
+- `/groups` and `/groups/:groupId` (`screens/groups/`), "My Groups": the groups the signed-in user is in
+  as one plain text grid (no pictures or avatars), the groups the user is only in first, then the ones
+  they lead, a chip on each says which. Mentors (`hooks/useIsMentor.ts`) get a "New Group" button that
+  opens a dialog form. The role comes from `lib/groups.ts` `getGroupRole`: the user is the group's
+  `mentor`, or a mentee whose `userId` is linked to their account. Only the mentor may edit
+  (`canEditGroup`). The detail screen lists members as a table, each row has a book button that opens a
+  dialog with a searchable, scrollable lesson checklist (the mentor ticks lessons per mentee because
+  members miss sessions, everyone else gets the same dialog with locked boxes and "view only"). The
+  mentor also gets an "Add Member" dialog form. Contact number and address are only shown to the
+  mentor, never to fellow mentees. Groups, mentees and completions live in
+  `zustand/slices/mentoringSlice.ts` so what a mentor creates shows everywhere (they reset on reload
+  until there is an API). `hooks/useGroupDetail.ts` returns undefined for a group the user is not in,
+  never show a group's page to a non-member.
+- `/store` (`screens/store/`), "Store": where points (XP) matter. The user's balance on top, then reward cards (`MOCK_STORE_ITEMS`, each with a price in XP), the ones the user can afford first with a Redeem button, the rest show how many XP are missing and a progress bar. Design only, Redeeming does nothing yet.
 - `/about` (`screens/about/AboutScreen.tsx`), the template's own documentation, rendered from
   `constant.ts` so it stays data-driven instead of hardcoded JSX: `STACK_ITEMS` (the dependency
   list), `CONVENTIONS` (the house-rules summary), `FILE_STRUCTURE` (walked recursively by
@@ -124,9 +163,50 @@ The route table lives in `routes/routes.config.ts`. Current flow:
   itself. Catches a lazy screen's chunk failing to load and shows a reload prompt instead of a
   blank screen, see the `components/` entry above for why.
 
-Both `/home` and `/about` share the same sticky header shape (`title` logo + `subtitle` tagline
-left, an action on the right), don't fork that into two different header implementations if a
-third screen is added, factor it into a shared component instead once there's a third copy.
+Every signed-in screen (Home, Profile, My Activities) renders inside `CustomAppShell`: on desktop an
+outlined sidebar sits directly beside the content column, both are one flat bordered container
+(no floating card, no rounded corners) centered on the page as a pair. From 1280px up a sticky promo column sits on the right as part of the same flat container ("Don't miss"): rows with a photo on the left and a title and subtitle, separated by dividers, no cards (`CustomPromoCard`, data from `hooks/usePromos.ts`). It is hidden on narrower screens and on mobile. On mobile there is a floating
+bottom dock instead. A sticky title sits over the content column with a round bell and mail button on its right (`CustomHeaderActions`, each has an unread badge and opens a dialog, closing it marks the items read). The page header, the promo heading and the sidebar logo row are all exactly `h-16` so their divider lines meet, and the sidebar dividers (under the logo, above the account row) run edge to edge with no background on the account row. Keep those heights equal. Its links come from
+`constants/navigation.ts`, add a screen there to put it in the nav. In the sidebar, "My Activities"
+and "My Groups" are single nav items with no sub links. "Merch" is a visual-only entry (no `path` in `constants/navigation.ts`, a plain row with no tag, not a link). Only entries with a path go in the mobile dock. `/about` is the template's own
+docs, it keeps the plain `CustomHeader` and is not in the nav. The signed-in user always comes from
+`hooks/useCurrentUser.ts`, never import `MOCK_USER` in a screen.
+
+## Forms and dialogs
+
+Popups use `CustomDialog` (native `<dialog>`, so Escape, focus trapping and the dimmed backdrop come for
+free, its content mounts fresh each time it opens). Put the form in its own component inside the
+dialog so its state resets on reopen. Forms use `react-hook-form` with the zod schema from
+`validations/` and `CustomInput`. Escape is handled through the `cancel` event so React state stays the source of truth (relying on the native `close` event left dialogs stuck open in state). Mark the field that should get focus with `data-autofocus`, React's
+`autoFocus` runs before the dialog is open and does nothing.
+
+## Colors
+
+The palette comes from the Connect2Souls banner: pink `#ff0050` (the `primary` token is deepened to
+`#e6004a` so white text passes contrast), teal `#00b7c3`, orange `#f5a61b`. `primary` is the pink,
+`secondary` a light teal tint, `info` a darker teal that is safe for text, and `accent` (teal) and
+`highlight` (the yellow-orange) are the playful fill colors, too light to use as text on white.
+Yellow means achievement: stat cards, the Mentor badge, the XP icon, pinned posts, "Serving in"
+chips. Put dark `text-foreground` on it, never white. Never hardcode
+a hex in a component, use the tokens in `index.css`.
+
+The W.O.R.D.A logo in `CustomAppShell` is the one place that uses raw Tailwind palette colors: W blue,
+O yellow, R red, D green, A black (the text color), each trailing dot matching its letter, on the
+plain page background.
+
+`lib/cn.ts` is configured with our `text-*` size classes. A new size class in `index.css` must be
+added to its `font-size` list too, otherwise `cn()` mistakes it for a color and drops it.
+
+## Mock data
+
+This is a prototype, so data lives in `constants/` and every mock export is prefixed `MOCK_`
+(`MOCK_USER`, `MOCK_POSTS`...). Every mock avatar, post image and promo photo is the one
+`PLACEHOLDER_IMAGE` in `constants/images.ts`. It is a signed CDN link that expires (around Oct 6, 2026),
+swap that one line to renew it. When an image fails to load the components fall back to the local
+`assets/placeholder.svg` (avatars to initials) through `lib/image.ts`. Search for `MOCK_` to find everything to delete when the API exists.
+Reference lists (`DEPARTMENTS`, `SECTIONS`, `CLUSTERS`, `TAGS`, `ACTIVITIES`...) are not prefixed,
+they will probably become API data too. Derived facts (a percentage, who is a mentor, what a user
+can see) are computed in `lib/`, never stored.
 
 ## House rules
 
