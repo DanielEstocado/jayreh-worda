@@ -32,3 +32,12 @@ export type ActivityProgress = {
   next?: { module: ActivityModule; lesson: ActivityLesson };
   modules: ModuleProgress[];
 };
+
+export type ActivityStatus = "ongoing" | "completed" | "not-started";
+
+// An activity's progress plus where the user stands with it, for activities they have not joined too.
+export type ActivityWithStatus = ActivityProgress & {
+  status: ActivityStatus;
+  // Labels of unfinished prerequisites, empty when the user could start it now.
+  blockedBy: string[];
+};

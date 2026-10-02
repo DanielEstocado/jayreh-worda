@@ -1,11 +1,20 @@
-// A mentor's group for one activity (C2S), mentees are enrolled into it.
+import type { ActivityProgress } from "@/types/activity";
+import type { User } from "@/types/church";
+
+// Just enough of a user to show who runs a group, the way an API embeds it.
+export type GroupMentor = Pick<User, "id" | "firstName" | "lastName" | "avatarUrl">;
+
+// A mentor's group for one activity (C2S), mentees are enrolled into it. Only its mentor can edit it.
 export type Group = {
   id: number;
   activityId: number;
-  mentorId: number;
+  mentor: GroupMentor;
   name: string;
   createdAt: string;
 };
+
+// How the signed-in user relates to a group: they run it, or they are a member of it.
+export type GroupRole = "mentor" | "mentee";
 
 // A person being mentored. No account and no login, the mentor records everything on their behalf.
 export type Mentee = {
@@ -27,4 +36,11 @@ export type MenteeCompletion = {
   menteeId: number;
   lessonId: number;
   completedAt: string;
+};
+
+// A mentee in a group with how far along they are and whether that mentee is the signed-in user.
+export type GroupMember = {
+  mentee: Mentee;
+  isMe: boolean;
+  progress: ActivityProgress;
 };

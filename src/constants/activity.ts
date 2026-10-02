@@ -22,3 +22,6 @@ export const LESSONS: ActivityLesson[] = [
 
 // Finishing this activity is what makes a user a mentor who can create C2S groups.
 export const MENTOR_ACTIVITY_ID = 2;
+
+// Every mentor group is a group for this activity.
+export const C2S_ACTIVITY_ID = 1;
