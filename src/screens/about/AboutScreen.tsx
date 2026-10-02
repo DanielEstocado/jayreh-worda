@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-import { CustomButton } from "@/components";
+import { CustomButton, CustomHeader } from "@/components";
 import FileTree from "./components/FileTree";
 import {
   FILE_STRUCTURE,
@@ -20,15 +20,8 @@ const AboutScreen = () => {
   };
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-lg py-sm">
-          <div>
-            <p className="title text-h3">Jayreh</p>
-            <p className="subtitle text-caption text-muted-foreground">
-              We code to provide
-            </p>
-          </div>
-
+      <CustomHeader
+        action={
           <CustomButton
             variant="ghost"
             size="md"
@@ -38,8 +31,8 @@ const AboutScreen = () => {
             <ChevronLeft size={16} />
             Go Back
           </CustomButton>
-        </div>
-      </header>
+        }
+      />
 
       <div className="mx-auto max-w-7xl px-lg py-xl">
         <div className="grid w-full grid-cols-1 gap-lg lg:grid-cols-2">

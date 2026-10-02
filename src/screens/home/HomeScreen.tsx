@@ -1,4 +1,4 @@
-import { CustomButton } from "@/components";
+import { CustomButton, CustomHeader } from "@/components";
 import { Moon, Sun } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,11 @@ function HomeScreen() {
     setDark((prev) => !prev);
   };
 
+  // Sends the user to the Ongoing screen, where they see the activities they joined.
+  const handleNavigateToOngoing = () => {
+    navigate("/ongoing");
+  };
+
   // Sends the user to the About screen, which documents this template's own structure.
   const handleNavigateToAbout = () => {
     navigate("/about");
@@ -22,15 +27,8 @@ function HomeScreen() {
   return (
     <main className={dark ? "dark" : ""}>
       <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-        <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-lg py-sm">
-            <div>
-              <p className="title text-h3">Jayreh</p>
-              <p className="subtitle text-caption text-muted-foreground">
-                We code to provide
-              </p>
-            </div>
-
+        <CustomHeader
+          action={
             <button
               onClick={handleToggleDark}
               className="subtitle flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm transition hover:opacity-80"
@@ -38,8 +36,8 @@ function HomeScreen() {
               {dark ? <Sun size={16} /> : <Moon size={16} />}
               {dark ? "Light" : "Dark"}
             </button>
-          </div>
-        </header>
+          }
+        />
 
         <section className="mx-auto flex max-w-3xl flex-col items-center px-lg py-xl text-center">
           <span className="subtitle mb-sm w-fit rounded-full bg-primary/10 px-4 py-1 text-caption font-semibold text-primary">
@@ -64,8 +62,12 @@ function HomeScreen() {
             >
               About this template
             </CustomButton>
-            <CustomButton variant="muted" className="subtitle rounded-full">
-              Muted Button
+            <CustomButton
+              variant="muted"
+              className="subtitle rounded-full"
+              onClick={handleNavigateToOngoing}
+            >
+              Ongoing
             </CustomButton>
           </div>
         </section>

@@ -9,4 +9,9 @@ type RouteConfig = {
 export const ROUTES: RouteConfig[] = [
   { path: "/home", screen: lazy(() => import("@/screens/home/HomeScreen")) },
   { path: "/about", screen: lazy(() => import("@/screens/about/AboutScreen")) },
+  { path: "/ongoing", screen: lazy(() => import("@/screens/ongoing/OngoingScreen")) },
+  {
+    path: "/ongoing/:activityId",
+    screen: lazy(() => import("@/screens/ongoing/ActivityDetailScreen")),
+  },
 ];
