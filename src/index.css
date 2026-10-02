@@ -7,32 +7,36 @@
      inherited default. Both are self-hosted via @fontsource(-variable), imported in main.tsx. */
   --font-sans: "Inter Variable", "Inter", sans-serif;
   --font-title: "Poppins", sans-serif;
-  --font-subtitle: "Inter Variable", "Inter", sans-serif;
+  --font-subtitle: "Poppins", sans-serif;
 }
 
 :root {
   /* Base */
-  --background: #f8fafc;
+  --background: #f1f5f9;
   --foreground: #111111;
 
   /* Brand */
-  --primary: #044b8b;
+  --primary: #e6004a;
   --primary-foreground: #ffffff;
 
   /* Secondary */
-  --secondary: #dbeafe;
-  --secondary-foreground: #1e3a8a;
+  --secondary: #d9f6f8;
+  --secondary-foreground: #0b6670;
 
   /* States */
   --success: #16a34a;
-  --warning: #f59e0b;
-  --error: #dc2626;
-  --info: #2563eb;
+  --warning: #f5a61b;
+  --error: #b91c1c;
+  --info: #087a86;
+
+  /* Playful brand accents for fills and decoration, too light for text on white */
+  --accent: #00b7c3;
+  --highlight: #f5a61b;
 
   /* UI */
-  --border: #e2e8f0;
+  --border: #cbd5e1;
   --input: #e2e8f0;
-  --ring: #044b8b;
+  --ring: #e6004a;
 
   /* Surface */
   --card: #ffffff;
@@ -70,23 +74,23 @@
   --foreground: #fafafa;
 
   /* Brand */
-  --primary: #3b82f6;
+  --primary: #ff4d7d;
   --primary-foreground: #ffffff;
 
   /* Secondary */
-  --secondary: #172554;
-  --secondary-foreground: #bfdbfe;
+  --secondary: #083a40;
+  --secondary-foreground: #a5f3fc;
 
   /* States */
   --success: #22c55e;
   --warning: #fbbf24;
   --error: #ef4444;
-  --info: #60a5fa;
+  --info: #22d3e0;
 
   /* UI */
   --border: #27272a;
   --input: #27272a;
-  --ring: #3b82f6;
+  --ring: #ff4d7d;
 
   /* Surface */
   --card: #111827;
@@ -112,6 +116,8 @@
   --color-warning: var(--warning);
   --color-error: var(--error);
   --color-info: var(--info);
+  --color-accent: var(--accent);
+  --color-highlight: var(--highlight);
 
   --color-border: var(--border);
   --color-input: var(--input);
@@ -275,4 +281,10 @@
   .gap-md { gap: var(--space-md); }
   .gap-lg { gap: var(--space-lg); }
   .gap-xl { gap: var(--space-xl); }
+}
+
+/* Always reserve the scrollbar's space, otherwise the centered layout shifts a few pixels when
+   navigating between a long page (has a scrollbar) and a short one (does not). */
+html {
+  scrollbar-gutter: stable;
 }
