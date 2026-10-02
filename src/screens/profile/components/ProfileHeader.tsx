@@ -71,7 +71,7 @@ const ProfileHeader = ({ user, tagLabels, isMentor, membershipLabels, stats }: P
               {membershipLabels.map((label) => (
                 <span
                   key={label}
-                  className="subtitle flex w-fit items-center gap-1.5 rounded-xl bg-highlight/15 px-sm py-1.5 text-body font-medium text-foreground"
+                  className="subtitle flex w-fit items-center gap-1.5 rounded-xl bg-highlight/15 px-sm py-1.5 text-body font-medium text-amber-900"
                 >
                   <Users size={14} />
                   {label}
@@ -84,8 +84,8 @@ const ProfileHeader = ({ user, tagLabels, isMentor, membershipLabels, stats }: P
         <dl className="mt-md grid grid-cols-3 gap-xs">
           {stats.map((stat) => (
             <div key={stat.label} className="rounded-2xl border border-highlight/40 bg-highlight/15 py-xs text-center">
-              <dd className="title text-h3 font-bold text-foreground">{stat.value}</dd>
-              <dt className="subtitle text-caption font-medium text-foreground/70">{stat.label}</dt>
+              <dd className="title text-h3 font-bold text-amber-900">{stat.value}</dd>
+              <dt className="subtitle text-caption font-medium text-amber-900/75">{stat.label}</dt>
             </div>
           ))}
         </dl>

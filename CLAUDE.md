@@ -187,7 +187,7 @@ The palette comes from the Connect2Souls banner: pink `#ff0050` (the `primary` t
 `secondary` a light teal tint, `info` a darker teal that is safe for text, and `accent` (teal) and
 `highlight` (the yellow-orange) are the playful fill colors, too light to use as text on white.
 Yellow means achievement: stat cards, the Mentor badge, the XP icon, pinned posts, "Serving in"
-chips. Put dark `text-foreground` on it, never white. Never hardcode
+chips. On a solid yellow or teal fill use a very dark shade of the same color (`text-amber-950`, `text-cyan-950`), never white. On a tinted card (`bg-primary/10`, `bg-highlight/15`, `bg-accent/15`) the text is a deep shade of the same color (rose, amber or cyan 900), never plain black, see `CustomActivityCard`. Never hardcode
 a hex in a component, use the tokens in `index.css`.
 
 The W.O.R.D.A logo in `CustomAppShell` is the one place that uses raw Tailwind palette colors: W blue,

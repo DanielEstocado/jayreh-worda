@@ -17,18 +17,18 @@ const StoreScreen = () => {
     <CustomAppShell title="Store">
       <div className="flex flex-col gap-sm p-sm">
         <div className="flex items-center gap-sm rounded-2xl border border-highlight/40 bg-highlight/15 p-sm">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-highlight text-foreground">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-highlight text-amber-950">
             <Sparkles size={24} />
           </span>
           <div>
-            <p className="subtitle text-caption font-medium text-foreground/70">
+            <p className="subtitle text-caption font-medium text-amber-900/75">
               Your points
             </p>
-            <p className="title text-h2 leading-tight font-bold text-foreground">
+            <p className="title text-h2 leading-tight font-bold text-amber-900">
               {user.exp.toLocaleString("en-US")} XP
             </p>
           </div>
-          <p className="subtitle ml-auto hidden max-w-40 text-right text-caption text-foreground/70 sm:block">
+          <p className="subtitle ml-auto hidden max-w-40 text-right text-caption text-amber-900/75 sm:block">
             Finish lessons or join activities to earn more and spend them here.
           </p>
         </div>

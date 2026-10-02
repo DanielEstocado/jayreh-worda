@@ -4,25 +4,31 @@ import { cn } from "@/lib/cn";
 import type { ActivityStatus } from "@/types/activity";
 import CustomCircularProgress from "./CustomCircularProgress";
 
-// The playful colors the cards rotate through, one theme per card.
+// The playful colors the cards rotate through, one theme per card. Text on a tinted card uses a deep shade of the same color (ink), never plain black.
 const THEMES = [
   {
     card: "border-primary/25 bg-primary/10",
     large: "border-l-primary from-primary/15 shadow-primary/20",
     stroke: "stroke-primary",
     chip: "bg-primary text-primary-foreground",
+    ink: "text-rose-900",
+    inkSoft: "text-rose-900/75",
   },
   {
     card: "border-accent/40 bg-accent/15",
     large: "border-l-accent from-accent/20 shadow-accent/25",
     stroke: "stroke-accent",
-    chip: "bg-accent text-foreground",
+    chip: "bg-accent text-cyan-950",
+    ink: "text-cyan-900",
+    inkSoft: "text-cyan-900/75",
   },
   {
     card: "border-highlight/40 bg-highlight/15",
     large: "border-l-highlight from-highlight/25 shadow-highlight/30",
     stroke: "stroke-highlight",
-    chip: "bg-highlight text-foreground",
+    chip: "bg-highlight text-amber-950",
+    ink: "text-amber-900",
+    inkSoft: "text-amber-900/75",
   },
 ];
 
@@ -31,6 +37,8 @@ const LOCKED_THEME = {
   large: "",
   stroke: "stroke-muted-foreground/40",
   chip: "bg-card text-muted-foreground",
+  ink: "text-muted-foreground",
+  inkSoft: "text-muted-foreground/80",
 };
 
 type CustomActivityCardProps = {
@@ -75,9 +83,9 @@ const CustomActivityCard = ({
       {isLocked ? (
         <Lock size={isLarge ? 28 : 18} className="text-muted-foreground" />
       ) : isComplete ? (
-        <Trophy size={isLarge ? 36 : 22} className="text-foreground/80" />
+        <Trophy size={isLarge ? 36 : 22} className={theme.ink} />
       ) : (
-        <span className={cn("title font-bold text-foreground", isLarge ? "text-h3" : "text-body")}>
+        <span className={cn("title font-bold", theme.ink, isLarge ? "text-h3" : "text-body")}>
           {percent}%
         </span>
       )}
@@ -100,10 +108,10 @@ const CustomActivityCard = ({
     <>
       <div className="min-w-0 flex-1">
         {chip}
-        <h3 className="title mt-1.5 truncate text-h3 font-bold text-foreground">{label}</h3>
-        <p className="subtitle mt-0.5 text-body text-foreground/70">{message}</p>
+        <h3 className={cn("title mt-1.5 truncate text-h3 font-bold", theme.ink)}>{label}</h3>
+        <p className={cn("subtitle mt-0.5 text-body", theme.inkSoft)}>{message}</p>
         {lessonCount && (
-          <p className="subtitle mt-0.5 text-caption font-medium text-muted-foreground">{lessonCount}</p>
+          <p className={cn("subtitle mt-0.5 text-caption font-medium", theme.inkSoft)}>{lessonCount}</p>
         )}
       </div>
       {ring}
@@ -113,12 +121,12 @@ const CustomActivityCard = ({
       {ring}
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-1.5">
-          <h3 className="title truncate text-body font-bold text-foreground">{label}</h3>
+          <h3 className={cn("title truncate text-body font-bold", theme.ink)}>{label}</h3>
           {chip}
         </div>
-        <p className="subtitle mt-0.5 text-caption text-foreground/70">
+        <p className={cn("subtitle mt-0.5 text-caption", theme.inkSoft)}>
           {message}
-          {lessonCount && <span className="text-foreground/60"> · {lessonCount}</span>}
+          {lessonCount && <span> · {lessonCount}</span>}
         </p>
       </div>
     </>
