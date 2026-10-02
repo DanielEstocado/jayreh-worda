@@ -1,0 +1,278 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Inter is the readable default for everything, Poppins is bold and geometric, great for a
+     short branded headline, hard to read as body copy. Opt into it with .title; .subtitle is
+     Inter made explicit, for when a line of text needs to say so even though it's already the
+     inherited default. Both are self-hosted via @fontsource(-variable), imported in main.tsx. */
+  --font-sans: "Inter Variable", "Inter", sans-serif;
+  --font-title: "Poppins", sans-serif;
+  --font-subtitle: "Inter Variable", "Inter", sans-serif;
+}
+
+:root {
+  /* Base */
+  --background: #f8fafc;
+  --foreground: #111111;
+
+  /* Brand */
+  --primary: #044b8b;
+  --primary-foreground: #ffffff;
+
+  /* Secondary */
+  --secondary: #dbeafe;
+  --secondary-foreground: #1e3a8a;
+
+  /* States */
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --error: #dc2626;
+  --info: #2563eb;
+
+  /* UI */
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #044b8b;
+
+  /* Surface */
+  --card: #ffffff;
+  --card-foreground: #111111;
+
+  /* Text */
+  --muted: #eef2f7;
+  --muted-foreground: #64748b;
+
+  /* Radius */
+  --radius: 0.75rem;
+
+  /* Spacing scale (mobile), redefined below at the lg breakpoint. One ladder shared by every
+     p-, px-, py-, m-, and gap- class in @layer components further down, so "md" is always the
+     same physical size regardless of which property uses it. */
+  --space-xs: 0.5rem; /* 8px */
+  --space-sm: 0.75rem; /* 12px */
+  --space-md: 1.25rem; /* 20px */
+  --space-lg: 1.5rem; /* 24px */
+  --space-xl: 3rem; /* 48px */
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --space-xs: 0.75rem; /* 12px */
+    --space-sm: 1rem; /* 16px */
+    --space-md: 1.5rem; /* 24px */
+    --space-lg: 2.5rem; /* 40px */
+    --space-xl: 6rem; /* 96px */
+  }
+}
+
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+
+  /* Brand */
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+
+  /* Secondary */
+  --secondary: #172554;
+  --secondary-foreground: #bfdbfe;
+
+  /* States */
+  --success: #22c55e;
+  --warning: #fbbf24;
+  --error: #ef4444;
+  --info: #60a5fa;
+
+  /* UI */
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #3b82f6;
+
+  /* Surface */
+  --card: #111827;
+  --card-foreground: #fafafa;
+
+  /* Text */
+  --muted: #18181b;
+  --muted-foreground: #a1a1aa;
+}
+
+@theme inline {
+  /* Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  /* Radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+}
+
+/* Typography scale, one class per role instead of sprinkling `text-5xl lg:text-7xl` per
+   component. Sizes/ratios are modeled on kabsu.me's hero (text-5xl -> lg:text-7xl headline,
+   text-base -> lg:text-xl body). Breakpoint matches Tailwind's own `lg` (1024px), so it reads
+   the same as every other responsive class in the app.
+
+   Typeface is a separate, composable class on purpose: .title/.subtitle only ever set
+   font-family, never font-size, so they combine freely with any size above, e.g.
+   `className="text-h1 title"` for a bold branded heading, `className="text-h1 subtitle"` for
+   the same size set in Inter instead. */
+@layer components {
+  .title {
+    font-family: var(--font-title);
+  }
+  .subtitle {
+    font-family: var(--font-subtitle);
+  }
+
+  .text-display {
+    font-size: 3rem; /* 48px, matches text-5xl */
+    line-height: 1;
+    font-weight: 700;
+  }
+  .text-h1 {
+    font-size: 2rem; /* 32px, matches text-4xl */
+    line-height: 1.2;
+    font-weight: 700;
+  }
+  .text-h2 {
+    font-size: 1.5rem; /* 24px, matches text-2xl */
+    line-height: 1.3;
+    font-weight: 600;
+  }
+  .text-h3 {
+    font-size: 1.25rem; /* 20px, matches text-xl */
+    line-height: 1.4;
+    font-weight: 600;
+  }
+  .text-body-lg {
+    font-size: 1rem; /* 16px, matches text-base */
+    line-height: 1.6;
+  }
+  .text-body {
+    font-size: 0.875rem; /* 14px, matches text-sm */
+    line-height: 1.6;
+  }
+  .text-caption {
+    font-size: 0.75rem; /* 12px, matches text-xs */
+    line-height: 1.4;
+  }
+
+  @media (min-width: 64rem) {
+    .text-display {
+      font-size: 4.5rem; /* 72px, matches text-7xl */
+    }
+    .text-h1 {
+      font-size: 3rem; /* 48px, matches text-5xl */
+    }
+    .text-h2 {
+      font-size: 2.25rem; /* 36px, matches text-4xl */
+    }
+    .text-h3 {
+      font-size: 1.5rem; /* 24px, matches text-2xl */
+    }
+    .text-body-lg {
+      font-size: 1.25rem; /* 20px, matches text-xl */
+    }
+    .text-body {
+      font-size: 1rem; /* 16px, matches text-base */
+    }
+    .text-caption {
+      font-size: 0.875rem; /* 14px, matches text-sm */
+    }
+  }
+
+  /* Spacing scale, one shared ladder (xs/sm/md/lg/xl) reused across every spacing property, so
+     "md" means the same physical size whether it's padding, a gap, or a margin. Each size is a
+     CSS variable that gets redefined once at the lg breakpoint (see the :root/@media block near
+     the color tokens above), so every class below is responsive for free, nothing here repeats
+     its own media query. */
+  .p-xs { padding: var(--space-xs); }
+  .p-sm { padding: var(--space-sm); }
+  .p-md { padding: var(--space-md); }
+  .p-lg { padding: var(--space-lg); }
+  .p-xl { padding: var(--space-xl); }
+
+  .px-xs { padding-inline: var(--space-xs); }
+  .px-sm { padding-inline: var(--space-sm); }
+  .px-md { padding-inline: var(--space-md); }
+  .px-lg { padding-inline: var(--space-lg); }
+  .px-xl { padding-inline: var(--space-xl); }
+
+  .py-xs { padding-block: var(--space-xs); }
+  .py-sm { padding-block: var(--space-sm); }
+  .py-md { padding-block: var(--space-md); }
+  .py-lg { padding-block: var(--space-lg); }
+  .py-xl { padding-block: var(--space-xl); }
+
+  .pt-xs { padding-top: var(--space-xs); }
+  .pt-sm { padding-top: var(--space-sm); }
+  .pt-md { padding-top: var(--space-md); }
+  .pt-lg { padding-top: var(--space-lg); }
+  .pt-xl { padding-top: var(--space-xl); }
+
+  .pb-xs { padding-bottom: var(--space-xs); }
+  .pb-sm { padding-bottom: var(--space-sm); }
+  .pb-md { padding-bottom: var(--space-md); }
+  .pb-lg { padding-bottom: var(--space-lg); }
+  .pb-xl { padding-bottom: var(--space-xl); }
+
+  .m-xs { margin: var(--space-xs); }
+  .m-sm { margin: var(--space-sm); }
+  .m-md { margin: var(--space-md); }
+  .m-lg { margin: var(--space-lg); }
+  .m-xl { margin: var(--space-xl); }
+
+  .mx-xs { margin-inline: var(--space-xs); }
+  .mx-sm { margin-inline: var(--space-sm); }
+  .mx-md { margin-inline: var(--space-md); }
+  .mx-lg { margin-inline: var(--space-lg); }
+  .mx-xl { margin-inline: var(--space-xl); }
+
+  .my-xs { margin-block: var(--space-xs); }
+  .my-sm { margin-block: var(--space-sm); }
+  .my-md { margin-block: var(--space-md); }
+  .my-lg { margin-block: var(--space-lg); }
+  .my-xl { margin-block: var(--space-xl); }
+
+  .mt-xs { margin-top: var(--space-xs); }
+  .mt-sm { margin-top: var(--space-sm); }
+  .mt-md { margin-top: var(--space-md); }
+  .mt-lg { margin-top: var(--space-lg); }
+  .mt-xl { margin-top: var(--space-xl); }
+
+  .mb-xs { margin-bottom: var(--space-xs); }
+  .mb-sm { margin-bottom: var(--space-sm); }
+  .mb-md { margin-bottom: var(--space-md); }
+  .mb-lg { margin-bottom: var(--space-lg); }
+  .mb-xl { margin-bottom: var(--space-xl); }
+
+  .gap-xs { gap: var(--space-xs); }
+  .gap-sm { gap: var(--space-sm); }
+  .gap-md { gap: var(--space-md); }
+  .gap-lg { gap: var(--space-lg); }
+  .gap-xl { gap: var(--space-xl); }
+}
