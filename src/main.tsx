@@ -2,8 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "sonner";
-import AppRoutes from "./routes";
 import ErrorBoundary from "./components/ErrorBoundary";
+import AppRoutes from "./routes";
+
 import "@fontsource-variable/inter/index.css";
 import "@fontsource/poppins/400.css";
 import "@fontsource/poppins/500.css";

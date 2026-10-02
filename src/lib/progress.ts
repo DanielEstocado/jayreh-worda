@@ -33,7 +33,8 @@ export function getActivityProgress({
 
   return {
     activity,
-    percent: totalPoints === 0 ? 0 : Math.round((donePoints / totalPoints) * 100),
+    percent:
+      totalPoints === 0 ? 0 : Math.round((donePoints / totalPoints) * 100),
     isComplete: ordered.length > 0 && !nextLesson,
     next: nextLesson && {
       module: activityModules.find((m) => m.id === nextLesson.moduleId)!,
@@ -45,7 +46,11 @@ export function getActivityProgress({
         .filter((l) => l.moduleId === m.id)
         .map((l) => ({
           ...l,
-          status: completed.has(l.id) ? "done" : l.id === nextLesson?.id ? "current" : "locked",
+          status: completed.has(l.id)
+            ? "done"
+            : l.id === nextLesson?.id
+              ? "current"
+              : "locked",
         })),
     })),
   };

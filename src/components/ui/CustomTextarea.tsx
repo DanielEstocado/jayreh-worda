@@ -6,7 +6,11 @@ type CustomTextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
 };
 
 // A themed textarea that shows a validation message underneath when one is passed in.
-const CustomTextarea = ({ error, className, ...props }: CustomTextareaProps) => {
+export default function CustomTextarea({
+  error,
+  className,
+  ...props
+}: CustomTextareaProps) {
   return (
     <div className="flex flex-col gap-1.5">
       <textarea
@@ -20,6 +24,4 @@ const CustomTextarea = ({ error, className, ...props }: CustomTextareaProps) => 
       {error && <p className="text-xs text-error">{error}</p>}
     </div>
   );
-};
-
-export default CustomTextarea;
+}

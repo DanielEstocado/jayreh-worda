@@ -1,32 +1,42 @@
-import { useState } from "react";
 import { Plus } from "lucide-react";
-import { CustomAppShell, CustomButton, CustomDialog } from "@/components";
-import { useIsMentor } from "@/hooks/useIsMentor";
-import { useMyGroups } from "@/hooks/useMyGroups";
+import { CustomButton, CustomDialog } from "@/components";
+import { useToggle } from "@/hooks/useToggle";
+import { useMyGroups } from "@/services/queries/group";
+import { useIsMentor } from "@/services/queries/user";
 import GroupCard from "./components/GroupCard";
 import NewGroupForm from "./components/NewGroupForm";
 
-// Every group the user is in as one grid, the ones other mentors run come first and the ones the user leads after, with a New Group button for mentors.
-const GroupsScreen = () => {
+// Every group the user is in as one roomy grid, the ones other mentors run come first and the ones the user leads after, with a New Group button for mentors.
+export default function GroupsScreen() {
   const { led, joined } = useMyGroups();
   const isMentor = useIsMentor();
-  const [creating, setCreating] = useState(false);
+  const {
+    open: createOpen,
+    onOpen: onCreateOpen,
+    onClose: onCreateClose,
+  } = useToggle();
+
   const groups = [...joined, ...led];
 
   return (
-    <CustomAppShell title="My Groups">
-      <div className="p-sm">
-        <div className="mb-sm flex items-start justify-between gap-sm">
-          <p className="subtitle text-body text-foreground/70">
-            Groups you are in come first. You can only edit the ones you lead.
-          </p>
+    <>
+      <div className="flex flex-col gap-md p-md">
+        <div className="flex items-start justify-between gap-sm">
+          <div>
+            <h2 className="title text-body-lg font-bold text-foreground">
+              {groups.length} {groups.length === 1 ? "group" : "groups"}
+            </h2>
+            <p className="subtitle text-body text-foreground/70">
+              Groups you are in come first. You can only edit the ones you lead.
+            </p>
+          </div>
 
           {isMentor && (
             <CustomButton
               variant="primary"
               size="sm"
               className="title shrink-0 gap-1 rounded-full"
-              onClick={() => setCreating(true)}
+              onClick={onCreateOpen}
             >
               <Plus size={14} />
               New Group
@@ -35,9 +45,11 @@ const GroupsScreen = () => {
         </div>
 
         {groups.length === 0 ? (
-          <p className="subtitle text-body text-foreground/70">You are not in any group yet.</p>
+          <p className="subtitle text-body text-foreground/70">
+            You are not in any group yet.
+          </p>
         ) : (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-md sm:grid-cols-2">
             {groups.map((myGroup) => (
               <GroupCard key={myGroup.group.id} myGroup={myGroup} />
             ))}
@@ -45,11 +57,9 @@ const GroupsScreen = () => {
         )}
       </div>
 
-      <CustomDialog open={creating} onClose={() => setCreating(false)} title="New Group">
-        <NewGroupForm onDone={() => setCreating(false)} />
+      <CustomDialog open={createOpen} onClose={onCreateClose} title="New Group">
+        <NewGroupForm onDone={onCreateClose} />
       </CustomDialog>
-    </CustomAppShell>
+    </>
   );
-};
-
-export default GroupsScreen;
+}

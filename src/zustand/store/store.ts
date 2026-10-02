@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { createInboxSlice, type InboxSlice } from "../slices/inboxSlice";
-import { createMentoringSlice, type MentoringSlice } from "../slices/mentoringSlice";
+import {
+  createMentoringSlice,
+  type MentoringSlice,
+} from "../slices/mentoringSlice";
 import { createPostSlice, type PostSlice } from "../slices/postSlice";
 
 export type AppState = PostSlice & MentoringSlice & InboxSlice;

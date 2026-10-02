@@ -21,12 +21,10 @@ export const MOCK_POSTS: Post[] = [
     },
     createdAt: "2026-09-28T09:30:00+08:00",
     title: "Group A just finished Module 1",
-    subtitle: "Three of four are through Lesson 2, praise God for faithful members.",
+    subtitle:
+      "Three of four are through Lesson 2, praise God for faithful members.",
     tagIds: [3],
-    images: [
-      PLACEHOLDER_IMAGE,
-      PLACEHOLDER_IMAGE,
-    ],
+    images: [PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE],
     likeCount: 24,
     audience: { type: "public" },
   },
@@ -40,7 +38,8 @@ export const MOCK_POSTS: Post[] = [
     },
     createdAt: "2026-09-27T18:00:00+08:00",
     title: "Sunday Service Schedule",
-    subtitle: "Services start at 9:00 AM and 11:00 AM this week, doors open 30 minutes early.",
+    subtitle:
+      "Services start at 9:00 AM and 11:00 AM this week, doors open 30 minutes early.",
     tagIds: [1],
     images: [],
     likeCount: 87,
@@ -74,13 +73,12 @@ export const MOCK_POSTS: Post[] = [
     title: "Sports Fest Registration is Open",
     subtitle: "Sign up your cluster before Friday, slots are limited.",
     tagIds: [1, 2],
-    images: [
-      PLACEHOLDER_IMAGE,
-      PLACEHOLDER_IMAGE,
-      PLACEHOLDER_IMAGE,
-    ],
+    images: [PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE, PLACEHOLDER_IMAGE],
     likeCount: 33,
-    audience: { type: "targeted", targets: [{ departmentId: 3, sectionId: 5 }] },
+    audience: {
+      type: "targeted",
+      targets: [{ departmentId: 3, sectionId: 5 }],
+    },
   },
   {
     id: 5,
@@ -96,7 +94,10 @@ export const MOCK_POSTS: Post[] = [
     tagIds: [4],
     images: [],
     likeCount: 12,
-    audience: { type: "targeted", targets: [{ departmentId: 3, sectionId: 5, clusterId: 6 }] },
+    audience: {
+      type: "targeted",
+      targets: [{ departmentId: 3, sectionId: 5, clusterId: 6 }],
+    },
   },
   {
     id: 6,
@@ -108,7 +109,8 @@ export const MOCK_POSTS: Post[] = [
     },
     createdAt: "2026-09-23T06:30:00+08:00",
     title: "Worship Team Rehearsal Moved",
-    subtitle: "Saturday rehearsal is now at 3 PM, please confirm with your leader.",
+    subtitle:
+      "Saturday rehearsal is now at 3 PM, please confirm with your leader.",
     tagIds: [1],
     images: [],
     likeCount: 9,

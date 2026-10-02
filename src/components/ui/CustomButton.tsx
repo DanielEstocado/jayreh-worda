@@ -12,7 +12,7 @@ type CustomButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   fullWidth?: boolean;
 };
 
-const variantStyles: Record<ButtonVariant, string> = {
+const VARIANT_STYLES: Record<ButtonVariant, string> = {
   primary:
     "bg-primary text-primary-foreground hover:opacity-90 border-transparent",
   secondary:
@@ -22,14 +22,14 @@ const variantStyles: Record<ButtonVariant, string> = {
   danger: "bg-error text-white hover:opacity-90 border-transparent",
 };
 
-const sizeStyles: Record<ButtonSize, string> = {
+const SIZE_STYLES: Record<ButtonSize, string> = {
   sm: "px-3 py-1.5 text-xs rounded-lg",
   md: "px-5 py-2.5 text-sm rounded-xl",
   lg: "px-7 py-3.5 text-base rounded-xl",
 };
 
 // A themed button that handles its own disabled/loading look so screens never restyle it by hand.
-const CustomButton = ({
+export default function CustomButton({
   variant = "primary",
   size = "md",
   children,
@@ -38,7 +38,7 @@ const CustomButton = ({
   disabled,
   className,
   ...props
-}: CustomButtonProps) => {
+}: CustomButtonProps) {
   const isDisabled = disabled || loading;
 
   return (
@@ -46,8 +46,8 @@ const CustomButton = ({
       disabled={isDisabled}
       className={cn(
         "inline-flex items-center justify-center gap-2 border font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-[0.97]",
-        variantStyles[variant],
-        sizeStyles[size],
+        VARIANT_STYLES[variant],
+        SIZE_STYLES[size],
         fullWidth && "w-full",
         isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
         className,
@@ -60,6 +60,4 @@ const CustomButton = ({
       {children}
     </button>
   );
-};
-
-export default CustomButton;
+}

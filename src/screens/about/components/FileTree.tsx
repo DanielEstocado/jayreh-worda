@@ -1,12 +1,12 @@
-import type { FileNode } from "../constant";
+import type { FileNode } from "@/types/about";
 
-type Props = {
+type FileTreeProps = {
   nodes: FileNode[];
   depth?: number;
 };
 
 // Recursively renders a file/folder tree with its description, indenting one level per nesting depth.
-const FileTree = ({ nodes, depth = 0.5 }: Props) => {
+export default function FileTree({ nodes, depth = 0.5 }: FileTreeProps) {
   return (
     <div style={{ paddingLeft: depth * 16 }}>
       {nodes.map((node) => (
@@ -27,6 +27,4 @@ const FileTree = ({ nodes, depth = 0.5 }: Props) => {
       ))}
     </div>
   );
-};
-
-export default FileTree;
+}

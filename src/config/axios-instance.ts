@@ -9,7 +9,11 @@ export const axiosInstance = axios.create({
 // Fails loudly when VITE_API_URL is missing instead of sending requests to the wrong host.
 axiosInstance.interceptors.request.use((config) => {
   if (!config.baseURL) {
-    return Promise.reject(new Error("VITE_API_URL is not set. Copy .env.example to .env and fill it in."));
+    return Promise.reject(
+      new Error(
+        "VITE_API_URL is not set. Copy .env.example to .env and fill it in.",
+      ),
+    );
   }
   return config;
 });

@@ -13,13 +13,9 @@ export default function NotFoundScreen() {
         </div>
 
         <div className="text-center">
-          <p className="title text-display tracking-tight text-primary">
-            404
-          </p>
+          <p className="title text-display tracking-tight text-primary">404</p>
 
-          <h1 className="title mt-4 text-h1 text-foreground">
-            Page Not Found
-          </h1>
+          <h1 className="title mt-4 text-h1 text-foreground">Page Not Found</h1>
 
           <p className="subtitle mx-auto mt-3 max-w-md text-body-lg text-muted-foreground">
             The page you are trying to access does not exist or may have been

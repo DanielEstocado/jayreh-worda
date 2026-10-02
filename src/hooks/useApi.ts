@@ -1,9 +1,10 @@
 import { useCallback, useState } from "react";
-import useSWR from "swr";
-import { toast } from "sonner";
 import type { AxiosRequestConfig, Method } from "axios";
-import { axiosInstance } from "@/config/axios-instance";
+import { toast } from "sonner";
+import useSWR from "swr";
 import { extractErrorMessage } from "@/lib/extractErrorMessage";
+
+import { axiosInstance } from "@/config/axios-instance";
 
 type MutationOptions<T> = {
   onSuccess?: (data: T) => void;
@@ -12,7 +13,10 @@ type MutationOptions<T> = {
 };
 
 // Fetches a GET endpoint and caches it, pass null to skip. The caller must render `error`, nothing toasts here.
-export function useApiQuery<T = unknown>(url: string | null, config?: AxiosRequestConfig) {
+export function useApiQuery<T = unknown>(
+  url: string | null,
+  config?: AxiosRequestConfig,
+) {
   const { data, error, isLoading, mutate } = useSWR<T>(url, () =>
     axiosInstance.get<T>(url!, config).then((res) => res.data),
   );
@@ -21,7 +25,10 @@ export function useApiQuery<T = unknown>(url: string | null, config?: AxiosReque
 }
 
 // Fires a one-off write request. A failure is always surfaced and never rejects, so no caller needs a try/catch.
-export function useApiMutation<T = unknown, B = unknown>(url: string, method: Method = "POST") {
+export function useApiMutation<T = unknown, B = unknown>(
+  url: string,
+  method: Method = "POST",
+) {
   const [isMutating, setIsMutating] = useState(false);
 
   // Sends the request, resolving to the response data, or undefined when it failed.
@@ -29,7 +36,11 @@ export function useApiMutation<T = unknown, B = unknown>(url: string, method: Me
     async (body?: B, options?: MutationOptions<T>): Promise<T | undefined> => {
       setIsMutating(true);
       try {
-        const response = await axiosInstance.request<T>({ url, method, data: body });
+        const response = await axiosInstance.request<T>({
+          url,
+          method,
+          data: body,
+        });
         options?.onSuccess?.(response.data);
         return response.data;
       } catch (error) {

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 
 type CustomCircularProgressProps = {
@@ -12,13 +12,13 @@ type CustomCircularProgressProps = {
 };
 
 // A ring that fills clockwise to the given percentage, with whatever is passed in shown in its center.
-const CustomCircularProgress = ({
+export default function CustomCircularProgress({
   percent,
   strokeClass,
   trackClass = "stroke-card",
   size = 64,
   children,
-}: CustomCircularProgressProps) => {
+}: CustomCircularProgressProps) {
   const [shown, setShown] = useState(0);
 
   // Starts the ring empty and fills it one frame later so it animates in on mount.
@@ -58,13 +58,16 @@ const CustomCircularProgress = ({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={circumference * (1 - shown / 100)}
-          className={cn(strokeClass, "transition-[stroke-dashoffset] duration-1000 ease-out")}
+          className={cn(
+            strokeClass,
+            "transition-[stroke-dashoffset] duration-1000 ease-out",
+          )}
         />
       </svg>
 
-      <div className="absolute inset-0 flex items-center justify-center">{children}</div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        {children}
+      </div>
     </div>
   );
-};
-
-export default CustomCircularProgress;
+}

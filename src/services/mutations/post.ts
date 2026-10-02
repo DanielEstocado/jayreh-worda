@@ -1,5 +1,5 @@
-import { MOCK_LIKED_POST_IDS } from "@/constants/post";
 import useStore from "@/zustand/store/store";
+import { MOCK_LIKED_POST_IDS } from "@/constants/post";
 import type { Post } from "@/types/post";
 
 // Reads and changes the user's likes and pins so every list of posts behaves the same.
@@ -17,11 +17,15 @@ export function usePostInteractions() {
   };
 
   return {
-    pinnedPostIds,
     isLiked: (postId: number) => likedPostIds.includes(postId),
     isPinned: (postId: number) => pinnedPostIds.includes(postId),
     getLikeCount,
     toggleLike,
     togglePin,
   };
+}
+
+// Returns the function that publishes a new post to the feed.
+export function useAddPost() {
+  return useStore((s) => s.addPost);
 }

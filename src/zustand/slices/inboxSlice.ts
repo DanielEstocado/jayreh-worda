@@ -11,15 +11,21 @@ export type InboxSlice = {
 };
 
 // The bell's notifications and the mail icon's messages with their read state, global so the header badge always matches.
-export const createInboxSlice: StateCreator<AppState, [], [], InboxSlice> = (set) => ({
+export const createInboxSlice: StateCreator<AppState, [], [], InboxSlice> = (
+  set,
+) => ({
   notifications: MOCK_NOTIFICATIONS,
   messages: MOCK_MESSAGES,
 
   // Marks every notification as read, done when the user closes the list.
   markNotificationsRead: () =>
-    set((state) => ({ notifications: state.notifications.map((n) => ({ ...n, read: true })) })),
+    set((state) => ({
+      notifications: state.notifications.map((n) => ({ ...n, read: true })),
+    })),
 
   // Marks every message as read, done when the user closes the list.
   markMessagesRead: () =>
-    set((state) => ({ messages: state.messages.map((m) => ({ ...m, read: true })) })),
+    set((state) => ({
+      messages: state.messages.map((m) => ({ ...m, read: true })),
+    })),
 });

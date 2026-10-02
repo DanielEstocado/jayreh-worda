@@ -1,6 +1,7 @@
 import type { StateCreator } from "zustand";
 import { MOCK_LIKED_POST_IDS, MOCK_PINS, MOCK_POSTS } from "@/constants/post";
 import { MOCK_USER } from "@/constants/user";
+import { nextId } from "@/lib/id";
 import type { Post } from "@/types/post";
 import type { AppState } from "../store/store";
 
@@ -15,7 +16,10 @@ export type PostSlice = {
 };
 
 // Posts plus the signed-in user's likes and pins, global so Home and Profile always agree on them.
-export const createPostSlice: StateCreator<AppState, [], [], PostSlice> = (set, get) => ({
+export const createPostSlice: StateCreator<AppState, [], [], PostSlice> = (
+  set,
+  get,
+) => ({
   posts: MOCK_POSTS,
   likedPostIds: MOCK_LIKED_POST_IDS,
   pinnedPostIds: MOCK_PINS.filter((p) => p.userId === MOCK_USER.id)
@@ -24,7 +28,10 @@ export const createPostSlice: StateCreator<AppState, [], [], PostSlice> = (set, 
 
   // Adds a new post and returns it.
   addPost: (input) => {
-    const post: Post = { ...input, id: Math.max(0, ...get().posts.map((p) => p.id)) + 1 };
+    const post: Post = {
+      ...input,
+      id: nextId(get().posts),
+    };
     set((state) => ({ posts: [post, ...state.posts] }));
     return post;
   },

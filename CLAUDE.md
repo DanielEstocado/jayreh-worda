@@ -9,12 +9,19 @@ described below, don't invent a different shape.
 ## Folder layout
 
 - `routes/routes.config.ts`: the single lazy-loaded `ROUTES` registry. Adding a screen means
-  adding one entry here. `routes/index.tsx` only renders it through one `<Routes>`/`<Suspense>`
-  loop, it stays a pure component so Vite's fast-refresh plugin doesn't complain, the registry
-  data and the component that consumes it are deliberately kept in separate files.
+  adding one entry here: its `path`, header `title`, an optional `backTo` (puts a back arrow in the
+  header) and `standalone: true` for a page that brings its own header (About). `routes/index.tsx`
+  only renders it, it stays a pure component so Vite's fast-refresh plugin doesn't complain, the
+  registry data and the component that consumes it are deliberately kept in separate files.
+  `routes/ShellLayout.tsx` is the layout route: it mounts the app frame (sidebar, header, promo
+  column, dock) once and renders the current screen through `<Outlet />`, so a screen never wraps
+  itself in a shell. A screen that only knows its title after loading (a group's name) calls
+  `useShellTitle(title)` from `hooks/useShellTitle.ts`.
 - `config/`: the one axios instance (`axios-instance.ts`, base URL + interceptors) and the one
   file of API endpoint path constants (`api.ts`, grouped by domain, e.g. `Api.ORDERS.INDEX`).
   Nothing calls a raw URL string directly.
+- `hooks/`: generic hooks used across the app (`useToggle`, `useShellTitle`, `useChurchLabels`).
+  Data hooks live in `services/`, not here.
 - `hooks/useApi.ts`: `useApiQuery` (SWR-cached GET) and `useApiMutation` (POST/PUT/DELETE).
   Every `services/` hook wraps one of these two, a screen never hand-rolls its own
   `fetch`/`try-catch`. `useApiMutation`'s `trigger` never rejects: it toasts on failure (or calls the
@@ -24,8 +31,15 @@ described below, don't invent a different shape.
 - `validations/`: one file per domain (`order.ts`, `user.ts`, `comment.ts`...), each holding that
   domain's zod schemas. A schema never lives inline in a screen or component, forms and the
   matching mutation both import the same schema from here.
-- `services/queries/` and `services/mutations/`, one file per domain, each exporting a hook
-  built on `useApi.ts`.
+- `services/queries/` and `services/mutations/`, one file per domain (`user.ts`, `post.ts`,
+  `group.ts`, `activity.ts`, `inbox.ts`, `promo.ts`, `store.ts`, `profile.ts`), each exporting the
+  hooks for that domain. **This is the only place a screen or component gets data from**: never
+  a `MOCK_` constant and never `useStore(...)` directly, ESLint fails the lint for both. While the
+  data is mock these hooks read `constants/` and the zustand store, when the API exists each body
+  swaps to `useApiQuery`/`useApiMutation` and no screen changes. A hook that reads and writes the
+  same state (`usePostInteractions`) lives in `mutations/`. Derived shapes (a feed for one tab,
+  the profile with its counts, a group with each mentee's progress) are built here, from the pure
+  helpers in `lib/`.
 - `zustand/slices/` + `zustand/store/store.ts`, one slice per domain of global client state,
   combined into the single store (`store.ts` starts empty, add a slice the moment one is needed).
   Reach for a slice only when state genuinely needs to survive across screens or be read by
@@ -45,17 +59,79 @@ described below, don't invent a different shape.
   `components/index.ts` (named exports). Prefix shared components `Custom*` (`CustomButton`,
   `CustomTextarea`...), so it's obvious at the import site whether something is a shared
   primitive or a screen-local one-off. `components/ui/` is purely presentational, no
-  business logic or data-fetching in there. `ErrorBoundary.tsx` is the one exception, it's
+  business logic or data-fetching in there. `components/shell/` holds the internal parts of the app frame (sidebar, header, promo column,
+  dock), only `routes/ShellLayout.tsx` imports them. Small shared building blocks live in
+  `ui/`: `CustomGlowCard` (the white card with a colored glow), `CustomChip` (the small rounded
+  pill), `CustomRingStat` (a progress ring with a caption) and `CustomImage` (a photo that falls
+  back to the local placeholder when its link breaks), use them instead of repeating the classes. `ErrorBoundary.tsx` is the one exception, it's
   mounted once in `main.tsx` around `<AppRoutes />`, not imported by screens, so it's not in the
   barrel, it catches a lazy route's chunk failing to load (a stale dev server, or an old tab open
   across a redeploy) and shows a reload prompt instead of a blank screen.
 - `lib/`: pure utility functions only (`cn.ts`, `extractErrorMessage.ts`, formatting, parsing,
-  calculations). This name, not `utils/`, one name for one concept.
+  calculations). This name, not `utils/`, one name for one concept. Pure means it imports no
+  `constants/`, no assets and no state: reference lists and mock data are passed in as arguments
+  (see `getGroupMentees`, `getMembershipLabel`), which is also what makes it testable.
 - `types/`: one file per domain (`types/order.ts`...), same split as `validations/`. `global.ts`
   is only for types genuinely shared app-wide. Don't let `global.ts` become the dumping ground,
   once a type is domain-specific, give it its own file.
 - `constants/`: one file per *app-wide* domain concept (permission strings, enums, limits), if
   the project needs any. Screen-local constants stay in that screen's own `constant.ts`.
+
+## Code standard
+
+Every file follows the same top-to-bottom layout, so any file reads like every other one:
+
+1. **Imports**, in this order and with no blank lines between them: `react`, `react-dom`,
+   `react-router`, other packages (icons, forms, zod, zustand), `@/assets`, then `@/components`, `@/hooks`, `@/services`, `@/zustand`, `@/constants`, `@/lib`, `@/validations`, `@/types` (types always last of the
+   aliased ones), then relative imports (`./components/...`, `./constant`). `npm run lint -- --fix`
+   sorts them, a wrong order fails the lint.
+2. **Local types** (`FooProps`, unions) right under the imports.
+3. **Module-level constants** (label maps, style maps, column configs, static lists),
+   `SCREAMING_SNAKE_CASE`. Instances stay camelCase (`axiosInstance`, zod schemas like
+   `newGroupSchema`, the `useStore` hook, `twMerge`).
+4. **Pure helpers** (builders, formatters, small leaf components used once) as function
+   declarations above the main component. Never define a helper inside a component body.
+5. **The main export last**: `export default function Name(props: NameProps)`. Components and
+   screens are function declarations, never `const Name = () =>` followed by `export default Name`.
+   Hooks, `lib/` helpers and store creators stay named exports.
+6. **Inside a component**, in this order: router and context hooks, store and data hooks, local
+   `useState`, derived values, `handleX` handlers (also form submit handlers, never `onSubmit`),
+   then the `return`. Props types are named `XProps` (never a bare `Props` or `State`).
+7. **Comments**: one short `//` line above every function, as in the house rules below.
+   A file that grows past about 150 lines is split: pull sections into their own components
+   (see `screens/about/components/` and `components/shell/`).
+8. **Formatting** is Prettier (`.prettierrc.json`, 2 spaces, double quotes, trailing commas, 80
+   columns), run `npm run format`. `npm run lint` and `npm run format:check` must both pass.
+
+A screen reads like this (imports, then types and constants, then helpers, then the screen):
+
+```tsx
+import { Plus } from "lucide-react";
+import { CustomButton } from "@/components";
+import { useToggle } from "@/hooks/useToggle";
+import { useMyGroups } from "@/services/queries/group";
+import type { Group } from "@/types/mentoring";
+import GroupCard from "./components/GroupCard";
+
+type SectionProps = { title: string; groups: Group[] };
+
+const EMPTY_MESSAGE = "You are not in any group yet.";
+
+// A titled grid of groups, hidden when there are none.
+function Section({ title, groups }: SectionProps) {
+  // ...
+}
+
+// Every group the user is in, with a New Group button for mentors.
+export default function GroupsScreen() {
+  const { led, joined } = useMyGroups();
+  const { open, onOpen, onClose } = useToggle();
+
+  const groups = [...joined, ...led];
+
+  return (/* ... */);
+}
+```
 
 ## Typography and spacing
 
@@ -64,7 +140,7 @@ components`, each with its own breakpoint built in), modeled on kabsu.me's respo
 (`text-5xl -> lg:text-7xl` headline, `text-base -> lg:text-xl` body):
 
 - `text-display` / `text-h1` / `text-h2` / `text-h3` / `text-body-lg` / `text-body` /
-  `text-caption`: each one already resizes itself at the `lg` breakpoint (1024px). Use these
+  `text-caption` / `text-micro` (11px, chips and badges only): each one already resizes itself at the `lg` breakpoint (1024px). Use these
   instead of ad hoc `text-5xl lg:text-7xl` on individual elements, a screen should never need to
   write its own responsive font-size pair.
 - `p-xs` / `p-sm` / `p-md` / `p-lg` / `p-xl` (and the same five sizes for `px-`, `py-`, `pt-`,
@@ -125,11 +201,11 @@ The route table lives in `routes/routes.config.ts`. Current flow:
   inline composer. `My Groups` / `Public` tabs (posts aimed at the user's departments, sections and clusters, and
   posts for everyone), each listing only posts the user is allowed to see (`lib/post.ts`
   `canSeePost`), newest first. Likes and pins are global state in
-  `zustand/slices/postSlice.ts`, read through `hooks/usePostInteractions.ts`, so Home and Profile
+  `zustand/slices/postSlice.ts`, read through `services/mutations/post.ts` (`usePostInteractions`), so Home and Profile
   always agree.
 - `/profile` (`screens/profile/ProfileScreen.tsx`), the signed-in user: avatar, tags, a derived
   Mentor badge (finished C2S101), where they serve, stats, then compact game-style cards for every activity (a ring that fills as lessons are done, not started ones greyed out,
-  `hooks/useMyActivityProgress.ts`, a finished enrollment always reads 100%), then `Posts` and `Pinned` tabs. Pins are
+  `services/queries/activity.ts`, a finished enrollment always reads 100%), then `Posts` and `Pinned` tabs. Pins are
   private to the user and a pinned post the user can no longer see is skipped, never shown.
 - `/activities` and `/activities/:activityId` (`screens/activities/`), "My Activities": every
   activity as a big neutral card, one per row, only the progress ring is colored and it sits on the
@@ -137,23 +213,23 @@ The route table lives in `routes/routes.config.ts`. Current flow:
   ones greyed out, and one ongoing activity module by module (done, current, locked). Progress is never stored,
   `lib/progress.ts` derives it from completed lessons.
 - `/groups` and `/groups/:groupId` (`screens/groups/`), "My Groups": the groups the signed-in user is in
-  as one plain text grid (no pictures or avatars), the groups the user is only in first, then the ones
-  they lead, a chip on each says which. Mentors (`hooks/useIsMentor.ts`) get a "New Group" button that
+  as one grid of roomy cards (no pictures or avatars, no colored strip, a ring with the group's average progress, yellow for groups the user leads and teal for ones they only belong to), the groups the user is only in first, then the ones
+  they lead, a chip on each says which. Mentors (`useIsMentor` in `services/queries/user.ts`) get a "New Group" button that
   opens a dialog form. The role comes from `lib/groups.ts` `getGroupRole`: the user is the group's
   `mentor`, or a mentee whose `userId` is linked to their account. Only the mentor may edit
-  (`canEditGroup`). The detail screen lists members as a table, each row has a book button that opens a
+  (`canEditGroup`). The detail screen lists the mentees as a table, each row has a book button that opens a
   dialog with a searchable, scrollable lesson checklist (the mentor ticks lessons per mentee because
-  members miss sessions, everyone else gets the same dialog with locked boxes and "view only"). The
-  mentor also gets an "Add Member" dialog form. Contact number and address are only shown to the
+  mentees miss sessions, everyone else gets the same dialog with locked boxes and "view only"). The
+  mentor also gets an "Add Mentee" dialog form. Contact number and address are only shown to the
   mentor, never to fellow mentees. Groups, mentees and completions live in
   `zustand/slices/mentoringSlice.ts` so what a mentor creates shows everywhere (they reset on reload
-  until there is an API). `hooks/useGroupDetail.ts` returns undefined for a group the user is not in,
-  never show a group's page to a non-member.
-- `/store` (`screens/store/`), "Store": where points (XP) matter. The user's balance on top, then reward cards (`MOCK_STORE_ITEMS`, each with a price in XP), the ones the user can afford first with a Redeem button, the rest show how many XP are missing and a progress bar. Design only, Redeeming does nothing yet.
+  until there is an API). `useGroupDetail` (`services/queries/group.ts`) returns undefined for a group the user is not in,
+  never show a group's page to someone who is not in it. In the UI a group's people are always called "mentees" (never "members"), singular "mentee" for one. The code uses the same word (`GroupMentee`, `MenteesTable`, `AddMenteeForm`), `Membership` still means a department, section or cluster a user serves in.
+- `/store` (`screens/store/`), "Store": where points (XP) matter. A big yellow points card with a ring showing progress to the next reward the user cannot afford yet, category filter chips (client state only), then two sections, "Ready to redeem" (full-width Redeem button) and "Keep earning" (XP missing and a progress bar, a Locked tag on the photo). Cards are roomy with the price as a yellow pill on the photo. Rewards are `MOCK_STORE_ITEMS`. Design only, Redeem does nothing yet.
 - `/about` (`screens/about/AboutScreen.tsx`), the template's own documentation, rendered from
   `constant.ts` so it stays data-driven instead of hardcoded JSX: `STACK_ITEMS` (the dependency
-  list), `CONVENTIONS` (the house-rules summary), `FILE_STRUCTURE` (walked recursively by
-  `components/FileTree.tsx`), `TYPE_SCALE` and `SPACING_SCALE` (live previews of the typography
+  list), `CONVENTIONS` (the house-rules summary), `FILE_STRUCTURE` (one level of `src/`, walked recursively by
+  `components/FileTree.tsx`, keep it to folders so it cannot drift), `TYPE_SCALE` and `SPACING_SCALE` (live previews of the typography
   and spacing scales described above). Its "Go Back" button returns to `/home`. When a new
   design-system primitive is added to `index.css`, add its live demo here, following the
   `TYPE_SCALE`/`SPACING_SCALE` pattern, so this page never drifts out of sync with what actually
@@ -163,16 +239,22 @@ The route table lives in `routes/routes.config.ts`. Current flow:
   itself. Catches a lazy screen's chunk failing to load and shows a reload prompt instead of a
   blank screen, see the `components/` entry above for why.
 
-Every signed-in screen (Home, Profile, My Activities) renders inside `CustomAppShell`: on desktop an
+Every signed-in screen renders inside the app frame that `routes/ShellLayout.tsx` mounts once: on desktop an
 outlined sidebar sits directly beside the content column, both are one flat bordered container
-(no floating card, no rounded corners) centered on the page as a pair. From 1280px up a sticky promo column sits on the right as part of the same flat container ("Don't miss"): rows with a photo on the left and a title and subtitle, separated by dividers, no cards (`CustomPromoCard`, data from `hooks/usePromos.ts`). It is hidden on narrower screens and on mobile. On mobile there is a floating
+(no floating card, no rounded corners) centered on the page as a pair. From 1280px up a sticky promo column sits on the right as part of the same flat container ("Don't miss"): rows with a photo on the left and a title and subtitle, separated by dividers, no cards (`CustomPromoCard`, data from `usePromos` in `services/queries/promo.ts`). It is hidden on narrower screens and on mobile. On mobile there is a floating icon-only (no labels, each link keeps an `aria-label`)
 bottom dock instead. A sticky title sits over the content column with a round bell and mail button on its right (`CustomHeaderActions`, each has an unread badge and opens a dialog, closing it marks the items read). The page header, the promo heading and the sidebar logo row are all exactly `h-16` so their divider lines meet, and the sidebar dividers (under the logo, above the account row) run edge to edge with no background on the account row. Keep those heights equal. Its links come from
 `constants/navigation.ts`, add a screen there to put it in the nav. In the sidebar, "My Activities"
 and "My Groups" are single nav items with no sub links. "Merch" is a visual-only entry (no `path` in `constants/navigation.ts`, a plain row with no tag, not a link). Only entries with a path go in the mobile dock. `/about` is the template's own
 docs, it keeps the plain `CustomHeader` and is not in the nav. The signed-in user always comes from
-`hooks/useCurrentUser.ts`, never import `MOCK_USER` in a screen.
+`useCurrentUser` in `services/queries/user.ts`, never import `MOCK_USER` in a screen.
 
 ## Forms and dialogs
+
+A dialog's open state is `hooks/useToggle.ts`, never a hand-written `useState(false)` with its own
+open and close handlers: `const { open, onOpen, onClose } = useToggle();`. When a screen has more
+than one, rename them as you destructure (`open: addOpen, onOpen: onAddOpen, onClose: onAddClose`).
+Call it with the other hooks, before any early return. State that is more than on or off (which
+row's lessons are open, which panel) stays a `useState`.
 
 Popups use `CustomDialog` (native `<dialog>`, so Escape, focus trapping and the dimmed backdrop come for
 free, its content mounts fresh each time it opens). Put the form in its own component inside the
@@ -187,10 +269,12 @@ The palette comes from the Connect2Souls banner: pink `#ff0050` (the `primary` t
 `secondary` a light teal tint, `info` a darker teal that is safe for text, and `accent` (teal) and
 `highlight` (the yellow-orange) are the playful fill colors, too light to use as text on white.
 Yellow means achievement: stat cards, the Mentor badge, the XP icon, pinned posts, "Serving in"
-chips. On a solid yellow or teal fill use a very dark shade of the same color (`text-amber-950`, `text-cyan-950`), never white. On a tinted card (`bg-primary/10`, `bg-highlight/15`, `bg-accent/15`) the text is a deep shade of the same color (rose, amber or cyan 900), never plain black, see `CustomActivityCard`. Never hardcode
+chips. On a solid yellow or teal fill use a very dark shade of the same color (`text-on-highlight`, `text-on-accent`), never white. On a tinted card (`bg-primary/10`, `bg-highlight/15`, `bg-accent/15`) the text is a deep shade of the same color (`text-ink-pink`, `text-ink-teal`, `text-ink-yellow`), never plain black. Those five are tokens in `index.css`, never write a raw `rose-`, `cyan-` or `amber-` palette class. Never hardcode
 a hex in a component, use the tokens in `index.css`.
 
-The W.O.R.D.A logo in `CustomAppShell` is the one place that uses raw Tailwind palette colors: W blue,
+`lib/tones.ts` is the one place the three brand colors (pink, teal, yellow) become classes: `TONES.pink.card`, `.glow`, `.chip`, `.stroke`, `.ink`, `.inkSoft`... A card, chip or ring takes a `tone` and reads from it, so a screen never writes its own color map. Rotating through the colors is `getRotatingTone(index)`.
+
+The W.O.R.D.A logo in `components/shell/ShellSidebar.tsx` is the one place that uses raw Tailwind palette colors: W blue,
 O yellow, R red, D green, A black (the text color), each trailing dot matching its letter, on the
 plain page background.
 
@@ -203,7 +287,7 @@ This is a prototype, so data lives in `constants/` and every mock export is pref
 (`MOCK_USER`, `MOCK_POSTS`...). Every mock avatar, post image and promo photo is the one
 `PLACEHOLDER_IMAGE` in `constants/images.ts`. It is a signed CDN link that expires (around Oct 6, 2026),
 swap that one line to renew it. When an image fails to load the components fall back to the local
-`assets/placeholder.svg` (avatars to initials) through `lib/image.ts`. Search for `MOCK_` to find everything to delete when the API exists.
+`assets/placeholder.svg` (avatars to initials) through `CustomImage`. Search for `MOCK_` to find everything to delete when the API exists.
 Reference lists (`DEPARTMENTS`, `SECTIONS`, `CLUSTERS`, `TAGS`, `ACTIVITIES`...) are not prefixed,
 they will probably become API data too. Derived facts (a percentage, who is a mentor, what a user
 can see) are computed in `lib/`, never stored.
@@ -240,8 +324,8 @@ can see) are computed in `lib/`, never stored.
 
 ## Testing
 
-- The template ships with no test setup on purpose. On a real project, add Vitest + React Testing Library, tests next to the file they cover, at minimum for every `lib/` pure function and any non-trivial business logic (ranking, pagination cursors, permission checks, money/date math).
+- Vitest (`npm test`), tests sit next to the file they cover (`lib/groups.test.ts`). Every `lib/` function with real logic gets one: visibility (`canSeePost`), roles (`getGroupRole`), progress and averages. Because `lib/` is pure, a test is just input and expected output, no mocking. Add React Testing Library the day a component has behavior worth pinning down.
 
 ## Before committing
 
-- `npm run build` (`tsc -b && vite build`) and `npm run lint` must both pass clean before calling anything done.
+- `npm run build` (`tsc -b && vite build`), `npm run lint`, `npm run format:check` and `npm test` must all pass clean before calling anything done. Lint also enforces the structure: a file over 150 lines (data files exempt) and a screen or component importing a `MOCK_` constant or the store directly both fail.

@@ -9,7 +9,11 @@ type CustomTabsProps<K extends string> = {
 };
 
 // A row of equal-width tabs with an underline under the active one.
-const CustomTabs = <K extends string>({ tabs, active, onChange }: CustomTabsProps<K>) => {
+export default function CustomTabs<K extends string>({
+  tabs,
+  active,
+  onChange,
+}: CustomTabsProps<K>) {
   return (
     <div role="tablist" className="flex border-b border-border">
       {tabs.map((tab) => (
@@ -30,6 +34,4 @@ const CustomTabs = <K extends string>({ tabs, active, onChange }: CustomTabsProp
       ))}
     </div>
   );
-};
-
-export default CustomTabs;
+}

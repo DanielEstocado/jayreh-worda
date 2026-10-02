@@ -1,4 +1,10 @@
-export type Activity = { id: number; label: string; prerequisiteIds: number[] };
+export type Activity = {
+  id: number;
+  label: string;
+  prerequisiteIds: number[];
+  // Shown on the card once finished, instead of the generic congratulation.
+  completedMessage?: string;
+};
 
 export type ActivityModule = {
   id: number;

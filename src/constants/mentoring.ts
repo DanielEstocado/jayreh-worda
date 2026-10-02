@@ -6,14 +6,24 @@ export const MOCK_GROUPS: Group[] = [
   {
     id: 1,
     activityId: 1,
-    mentor: { id: 1, firstName: "Dan", lastName: "Estocado", avatarUrl: PLACEHOLDER_IMAGE },
+    mentor: {
+      id: 1,
+      firstName: "Dan",
+      lastName: "Estocado",
+      avatarUrl: PLACEHOLDER_IMAGE,
+    },
     name: "Group A",
     createdAt: "2026-09-02",
   },
   {
     id: 2,
     activityId: 1,
-    mentor: { id: 20, firstName: "King Ezekiel", lastName: "Domingo", avatarUrl: PLACEHOLDER_IMAGE },
+    mentor: {
+      id: 20,
+      firstName: "King Ezekiel",
+      lastName: "Domingo",
+      avatarUrl: PLACEHOLDER_IMAGE,
+    },
     name: "King's Group",
     createdAt: "2026-08-20",
   },
@@ -87,7 +97,7 @@ export const MOCK_MENTEES: Mentee[] = [
   },
 ];
 
-// MOCK: lessons the mentor marked done per mentee, uneven on purpose since members miss sessions.
+// MOCK: lessons the mentor marked done per mentee, uneven on purpose since mentees miss sessions.
 export const MOCK_MENTEE_COMPLETIONS: MenteeCompletion[] = [
   // Maria is furthest along, one lesson left.
   { menteeId: 1, lessonId: 1, completedAt: "2026-09-05" },

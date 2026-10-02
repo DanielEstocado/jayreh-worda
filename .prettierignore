@@ -1,0 +1,7 @@
+dist
+node_modules
+package-lock.json
+public
+# The spacing and type scale in index.css is deliberately one rule per line, and the markdown docs are hand-wrapped.
+src/index.css
+*.md

@@ -1,89 +1,108 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { Eye, Pencil, UserPlus } from "lucide-react";
-import { CustomAppShell, CustomButton, CustomDialog } from "@/components";
-import { useGroupDetail } from "@/hooks/useGroupDetail";
-import AddMemberForm from "./components/AddMemberForm";
+import { UserPlus } from "lucide-react";
+import { CustomButton, CustomDialog } from "@/components";
+import { useShellTitle } from "@/hooks/useShellTitle";
+import { useToggle } from "@/hooks/useToggle";
+import { useToggleMenteeLesson } from "@/services/mutations/group";
+import { useGroupDetail } from "@/services/queries/group";
+import AddMenteeForm from "./components/AddMenteeForm";
+import GroupAccessNote from "./components/GroupAccessNote";
+import GroupSummaryCard from "./components/GroupSummaryCard";
 import LessonChecklist from "./components/LessonChecklist";
-import MembersTable from "./components/MembersTable";
+import MenteesTable from "./components/MenteesTable";
 
-// One group: who runs it, whether the user may edit it, and its members as a table. Only the group's mentor can add members or tick lessons.
-const GroupDetailScreen = () => {
+// One group: a summary card, a note on whether the user may edit, and the mentees as a table. Only the mentor can add mentees or tick lessons.
+export default function GroupDetailScreen() {
   const { groupId } = useParams();
   const detail = useGroupDetail(Number(groupId));
+  const toggleMenteeLesson = useToggleMenteeLesson();
+  useShellTitle(detail?.group.name);
   const [lessonsForId, setLessonsForId] = useState<number | null>(null);
-  const [adding, setAdding] = useState(false);
+  const { open: addOpen, onOpen: onAddOpen, onClose: onAddClose } = useToggle();
 
   if (!detail) {
     return (
-      <CustomAppShell title="Group" backTo="/groups">
-        <p className="subtitle p-sm text-body text-foreground/70">
+      <>
+        <p className="subtitle p-md text-body text-foreground/70">
           This group doesn't exist or you are not in it.
         </p>
-      </CustomAppShell>
+      </>
     );
   }
 
-  const { group, canEdit, activityLabel, members, toggleMenteeLesson } = detail;
+  const { group, canEdit, activityLabel, averagePercent, mentees } = detail;
   const mentorName = `${group.mentor.firstName} ${group.mentor.lastName}`;
-  const lessonsMember = members.find((m) => m.mentee.id === lessonsForId);
+  const lessonsMentee = mentees.find((m) => m.mentee.id === lessonsForId);
+
+  // Closes the lessons dialog.
+  const handleCloseLessons = () => setLessonsForId(null);
+
+  // Ticks or unticks a lesson for the mentee whose dialog is open.
+  const handleToggleLesson = (lessonId: number) => {
+    if (lessonsMentee) toggleMenteeLesson(lessonsMentee.mentee.id, lessonId);
+  };
 
   return (
-    <CustomAppShell title={group.name} backTo="/groups">
-      <div className="flex flex-col gap-sm p-sm">
-        <div className="rounded-2xl border border-border bg-card p-sm">
-          <p className="subtitle text-caption text-muted-foreground">Mentor · {activityLabel}</p>
-          <h2 className="title truncate text-body-lg font-bold text-foreground">
-            {canEdit ? "You" : mentorName}
-          </h2>
-        </div>
+    <>
+      <div className="flex flex-col gap-md p-md">
+        <GroupSummaryCard
+          canEdit={canEdit}
+          mentorName={mentorName}
+          activityLabel={activityLabel}
+          menteeCount={mentees.length}
+          averagePercent={averagePercent}
+        />
 
-        <p className="subtitle flex items-center gap-2 rounded-xl bg-muted px-sm py-2 text-caption text-foreground/70">
-          {canEdit ? <Pencil size={14} className="shrink-0" /> : <Eye size={14} className="shrink-0" />}
-          {canEdit
-            ? "You lead this group. Add members, and open a member's lessons to tick them done."
-            : `View only. Only ${mentorName} can update this group.`}
-        </p>
+        <GroupAccessNote canEdit={canEdit} mentorName={mentorName} />
 
         <section>
-          <div className="mb-2 flex items-center justify-between gap-sm">
-            <h2 className="title text-body-lg font-bold text-foreground">Members ({members.length})</h2>
+          <div className="mb-sm flex items-center justify-between gap-sm">
+            <h2 className="title text-body-lg font-bold text-foreground">
+              {mentees.length === 1 ? "Mentee" : "Mentees"} ({mentees.length})
+            </h2>
             {canEdit && (
               <CustomButton
                 variant="primary"
                 size="sm"
                 className="title gap-1 rounded-full"
-                onClick={() => setAdding(true)}
+                onClick={onAddOpen}
               >
                 <UserPlus size={14} />
-                Add Member
+                Add Mentee
               </CustomButton>
             )}
           </div>
 
-          <MembersTable members={members} canEdit={canEdit} onOpenLessons={setLessonsForId} />
+          <MenteesTable
+            mentees={mentees}
+            canEdit={canEdit}
+            onOpenLessons={setLessonsForId}
+          />
         </section>
       </div>
 
       <CustomDialog
-        open={Boolean(lessonsMember)}
-        onClose={() => setLessonsForId(null)}
-        title={lessonsMember ? `${lessonsMember.mentee.firstName} ${lessonsMember.mentee.lastName}` : "Lessons"}
+        open={Boolean(lessonsMentee)}
+        onClose={handleCloseLessons}
+        title={
+          lessonsMentee
+            ? `${lessonsMentee.mentee.firstName} ${lessonsMentee.mentee.lastName}`
+            : "Lessons"
+        }
       >
-        {lessonsMember && (
+        {lessonsMentee && (
           <LessonChecklist
-            progress={lessonsMember.progress}
+            progress={lessonsMentee.progress}
             canEdit={canEdit}
-            onToggle={(lessonId) => toggleMenteeLesson(lessonsMember.mentee.id, lessonId)}
+            onToggle={handleToggleLesson}
           />
         )}
       </CustomDialog>
 
-      <CustomDialog open={adding} onClose={() => setAdding(false)} title="Add Member">
-        <AddMemberForm groupId={group.id} onDone={() => setAdding(false)} />
+      <CustomDialog open={addOpen} onClose={onAddClose} title="Add Mentee">
+        <AddMenteeForm groupId={group.id} onDone={onAddClose} />
       </CustomDialog>
-    </CustomAppShell>
+    </>
   );
-};
-
-export default GroupDetailScreen;
+}

@@ -1,33 +1,69 @@
-import { CircleCheck, CirclePlay, Lock } from "lucide-react";
+import { Check, Lock, Play } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { LessonProgress } from "@/types/activity";
 
-const STATUS_ICON = {
-  done: <CircleCheck size={16} className="text-success" />,
-  current: <CirclePlay size={16} className="text-primary" />,
-  locked: <Lock size={16} className="text-muted-foreground/70" />,
-};
-
 type LessonRowProps = { lesson: LessonProgress };
 
-// One compact lesson line with its status icon: the current one is boldest, done ones fade back, locked ones fade the most.
-const LessonRow = ({ lesson }: LessonRowProps) => {
+const STATUS_TILE = {
+  done: { icon: <Check size={16} />, tile: "bg-success/15 text-success" },
+  current: {
+    icon: <Play size={14} className="fill-current" />,
+    tile: "bg-primary text-primary-foreground",
+  },
+  locked: { icon: <Lock size={14} />, tile: "bg-muted text-muted-foreground" },
+};
+
+// One roomy lesson row: a status tile, the lesson number and title, and its XP. The current lesson is highlighted with an "Up next" tag, finished ones fade back and locked ones fade the most.
+export default function LessonRow({ lesson }: LessonRowProps) {
+  const { icon, tile } = STATUS_TILE[lesson.status];
+  const isCurrent = lesson.status === "current";
+
   return (
     <li
       className={cn(
-        "subtitle flex items-center gap-2 rounded-xl px-2 py-1.5 text-body",
-        lesson.status === "current" && "bg-primary/10 font-semibold text-foreground",
-        lesson.status === "done" && "text-foreground/70",
-        lesson.status === "locked" && "text-muted-foreground/70",
+        "flex items-center gap-sm rounded-2xl border px-sm py-3",
+        isCurrent ? "border-primary/30 bg-primary/10" : "border-transparent",
+        lesson.status === "locked" && "opacity-60",
       )}
     >
-      {STATUS_ICON[lesson.status]}
-      <span className="min-w-0 flex-1 truncate">
-        Lesson {lesson.number}: {lesson.title}
+      <span
+        className={cn(
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+          tile,
+        )}
+      >
+        {icon}
       </span>
-      <span className="shrink-0 text-caption text-muted-foreground/70">{lesson.points} pts</span>
+
+      <div className="min-w-0 flex-1">
+        <p
+          className={cn(
+            "subtitle text-caption",
+            isCurrent ? "text-ink-pink/70" : "text-muted-foreground",
+          )}
+        >
+          Lesson {lesson.number}
+        </p>
+        <p
+          className={cn(
+            "subtitle text-body",
+            isCurrent && "font-semibold text-ink-pink",
+            lesson.status === "done" && "text-foreground/70",
+            lesson.status === "locked" && "text-muted-foreground",
+          )}
+        >
+          {lesson.title}
+        </p>
+      </div>
+
+      {isCurrent && (
+        <span className="subtitle hidden shrink-0 rounded-full bg-primary px-2.5 py-0.5 text-micro font-medium text-primary-foreground sm:inline">
+          Up next
+        </span>
+      )}
+      <span className="title shrink-0 rounded-full bg-highlight/15 px-2.5 py-0.5 text-caption font-bold text-ink-yellow">
+        {lesson.points} XP
+      </span>
     </li>
   );
-};
-
-export default LessonRow;
+}

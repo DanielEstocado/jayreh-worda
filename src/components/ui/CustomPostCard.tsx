@@ -1,8 +1,8 @@
 import { Globe, Heart, Pin, Users } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { showFallbackImage } from "@/lib/image";
 import type { Post } from "@/types/post";
 import CustomAvatar from "./CustomAvatar";
+import CustomImage from "./CustomImage";
 
 type CustomPostCardProps = {
   post: Post;
@@ -23,7 +23,7 @@ const IMAGE_GRID: Record<number, string> = {
 };
 
 // One post in the feed: a header row with who wrote it and who it is for, then the text, images and the like and pin buttons at full width below.
-const CustomPostCard = ({
+export default function CustomPostCard({
   post,
   tagLabels,
   audienceLabel,
@@ -33,7 +33,7 @@ const CustomPostCard = ({
   pinned,
   onToggleLike,
   onTogglePin,
-}: CustomPostCardProps) => {
+}: CustomPostCardProps) {
   const authorName = `${post.author.firstName} ${post.author.lastName}`;
   const images = post.images.slice(0, 3);
   const AudienceIcon = post.audience.type === "public" ? Globe : Users;
@@ -45,8 +45,12 @@ const CustomPostCard = ({
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-baseline gap-x-2">
-            <span className="title text-body font-semibold text-foreground">{authorName}</span>
-            <span className="subtitle text-caption text-muted-foreground">{dateTime}</span>
+            <span className="title text-body font-semibold text-foreground">
+              {authorName}
+            </span>
+            <span className="subtitle text-caption text-muted-foreground">
+              {dateTime}
+            </span>
           </div>
           <p className="subtitle mt-0.5 flex items-center gap-1 text-caption text-muted-foreground/70">
             <AudienceIcon size={12} />
@@ -56,8 +60,12 @@ const CustomPostCard = ({
       </header>
 
       <div className="mt-md">
-        <h2 className="subtitle text-body font-medium text-foreground/85">{post.title}</h2>
-        <p className="subtitle mt-1 text-body text-foreground/70">{post.subtitle}</p>
+        <h2 className="subtitle text-body font-medium text-foreground/85">
+          {post.title}
+        </h2>
+        <p className="subtitle mt-1 text-body text-foreground/70">
+          {post.subtitle}
+        </p>
 
         {tagLabels.length > 0 && (
           <div className="mt-xs flex flex-wrap gap-1.5">
@@ -75,13 +83,9 @@ const CustomPostCard = ({
         {images.length > 0 && (
           <div className={cn("mt-sm grid gap-1.5", IMAGE_GRID[images.length])}>
             {images.map((src, i) => (
-              <img
+              <CustomImage
                 key={`${src}-${i}`}
                 src={src}
-                alt=""
-                loading="lazy"
-                referrerPolicy="no-referrer"
-                onError={showFallbackImage}
                 className="aspect-4/3 w-full rounded-xl border border-border object-cover"
               />
             ))}
@@ -108,7 +112,9 @@ const CustomPostCard = ({
             aria-label={pinned ? "Unpin" : "Pin to my profile"}
             className={cn(
               "subtitle flex cursor-pointer items-center gap-1.5 rounded-full px-2 py-1 text-body font-medium transition hover:bg-muted",
-              pinned ? "bg-highlight/20 text-foreground" : "text-muted-foreground",
+              pinned
+                ? "bg-highlight/20 text-foreground"
+                : "text-muted-foreground",
             )}
           >
             <Pin size={18} className={cn(pinned && "fill-highlight")} />
@@ -118,6 +124,4 @@ const CustomPostCard = ({
       </div>
     </article>
   );
-};
-
-export default CustomPostCard;
+}

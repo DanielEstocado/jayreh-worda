@@ -7,6 +7,9 @@ export function hasCompletedActivity(
   activityId: number,
 ): boolean {
   return enrollments.some(
-    (e) => e.userId === userId && e.activityId === activityId && Boolean(e.completedAt),
+    (e) =>
+      e.userId === userId &&
+      e.activityId === activityId &&
+      Boolean(e.completedAt),
   );
 }

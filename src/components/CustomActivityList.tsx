@@ -1,6 +1,7 @@
-import { useMyActivityProgress } from "@/hooks/useMyActivityProgress";
+import { useMyActivityProgress } from "@/services/queries/activity";
 import { getActivityMessage, getLessonCountLabel } from "@/lib/activity";
 import { cn } from "@/lib/cn";
+import { getRotatingTone } from "@/lib/tones";
 import CustomActivityCard from "./ui/CustomActivityCard";
 
 type CustomActivityListProps = {
@@ -9,7 +10,9 @@ type CustomActivityListProps = {
 };
 
 // Every activity as a game-style card, ongoing ones open their detail, shared by Profile (compact) and My Activities (large).
-const CustomActivityList = ({ variant = "compact" }: CustomActivityListProps) => {
+export default function CustomActivityList({
+  variant = "compact",
+}: CustomActivityListProps) {
   const activities = useMyActivityProgress();
 
   return (
@@ -27,13 +30,15 @@ const CustomActivityList = ({ variant = "compact" }: CustomActivityListProps) =>
           status={item.status}
           message={getActivityMessage(item)}
           lessonCount={getLessonCountLabel(item)}
-          to={item.status === "ongoing" ? `/activities/${item.activity.id}` : undefined}
-          themeIndex={i}
+          to={
+            item.status === "ongoing"
+              ? `/activities/${item.activity.id}`
+              : undefined
+          }
+          tone={getRotatingTone(i)}
           variant={variant}
         />
       ))}
     </div>
   );
-};
-
-export default CustomActivityList;
+}

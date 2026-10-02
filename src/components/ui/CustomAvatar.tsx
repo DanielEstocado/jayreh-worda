@@ -10,7 +10,7 @@ type CustomAvatarProps = {
   className?: string;
 };
 
-const sizeStyles: Record<AvatarSize, string> = {
+const SIZE_STYLES: Record<AvatarSize, string> = {
   sm: "h-8 w-8 text-xs",
   md: "h-10 w-10 text-sm",
   lg: "h-12 w-12 text-base",
@@ -18,7 +18,12 @@ const sizeStyles: Record<AvatarSize, string> = {
 };
 
 // A round profile picture that falls back to the person's initials when there is no image.
-const CustomAvatar = ({ name, src, size = "md", className }: CustomAvatarProps) => {
+export default function CustomAvatar({
+  name,
+  src,
+  size = "md",
+  className,
+}: CustomAvatarProps) {
   // A picture that fails to load (e.g. an expired link) falls back to the initials.
   const [failed, setFailed] = useState(false);
   const initials = name
@@ -33,7 +38,7 @@ const CustomAvatar = ({ name, src, size = "md", className }: CustomAvatarProps) 
     <span
       className={cn(
         "title inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary font-semibold text-secondary-foreground",
-        sizeStyles[size],
+        SIZE_STYLES[size],
         className,
       )}
     >
@@ -50,6 +55,4 @@ const CustomAvatar = ({ name, src, size = "md", className }: CustomAvatarProps) 
       )}
     </span>
   );
-};
-
-export default CustomAvatar;
+}

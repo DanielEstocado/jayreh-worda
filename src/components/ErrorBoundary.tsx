@@ -2,12 +2,15 @@ import { Component, type ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 import { CustomButton } from "@/components";
 
-type Props = { children: ReactNode };
-type State = { hasError: boolean };
+type ErrorBoundaryProps = { children: ReactNode };
+type ErrorBoundaryState = { hasError: boolean };
 
 // Shows a reload prompt instead of a blank screen when a child throws, e.g. a lazy chunk that failed to load.
-export default class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false };
+export default class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
+  state: ErrorBoundaryState = { hasError: false };
 
   // Flips the boundary into its fallback state the moment a child throws during render.
   static getDerivedStateFromError() {

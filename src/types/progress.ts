@@ -6,4 +6,8 @@ export type Enrollment = {
   completedAt?: string;
 };
 
-export type LessonCompletion = { userId: number; lessonId: number; completedAt: string };
+export type LessonCompletion = {
+  userId: number;
+  lessonId: number;
+  completedAt: string;
+};

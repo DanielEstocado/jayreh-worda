@@ -1,4 +1,4 @@
-import type { Membership } from "@/types/church";
+import type { ChurchLists, Membership } from "@/types/church";
 import type { Post, PostAudience } from "@/types/post";
 import { getMembershipLabel } from "./church";
 
@@ -17,11 +17,14 @@ export function canSeePost(post: Post, memberships: Membership[]): boolean {
 }
 
 // Describes who a post is for: "Public", or the first target and how many more there are.
-export function getAudienceLabel(audience: PostAudience): string {
+export function getAudienceLabel(
+  audience: PostAudience,
+  lists: ChurchLists,
+): string {
   if (audience.type === "public") return "Public";
 
   const [first, ...rest] = audience.targets;
-  const label = getMembershipLabel(first);
+  const label = getMembershipLabel(first, lists);
   return rest.length > 0 ? `${label} +${rest.length}` : label;
 }
 

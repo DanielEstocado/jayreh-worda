@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 type CustomDialogProps = {
@@ -9,7 +9,12 @@ type CustomDialogProps = {
 };
 
 // A modal dialog built on the native <dialog>, so focus stays inside, Escape closes it and the page behind is inert. Its content mounts fresh each time it opens.
-const CustomDialog = ({ open, onClose, title, children }: CustomDialogProps) => {
+export default function CustomDialog({
+  open,
+  onClose,
+  title,
+  children,
+}: CustomDialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
 
   // Opens or closes the native dialog whenever the open prop changes, and focuses the field marked data-autofocus (React's autoFocus runs before the dialog is open).
@@ -56,6 +61,4 @@ const CustomDialog = ({ open, onClose, title, children }: CustomDialogProps) => 
       </div>
     </dialog>
   );
-};
-
-export default CustomDialog;
+}

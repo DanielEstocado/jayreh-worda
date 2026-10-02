@@ -1,11 +1,11 @@
-import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { CustomButton, CustomInput, CustomTextarea } from "@/components";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useAddPost } from "@/services/mutations/post";
+import { useCurrentUser } from "@/services/queries/user";
 import { cn } from "@/lib/cn";
-import { newPostSchema, type NewPostInput } from "@/validations/post";
-import useStore from "@/zustand/store/store";
+import { type NewPostInput, newPostSchema } from "@/validations/post";
 
 type NewPostFormProps = {
   // Called when the form is done, with the audience that was chosen when a post was made so the feed can show it.
@@ -18,9 +18,9 @@ const AUDIENCE_OPTIONS: { value: NewPostInput["audience"]; label: string }[] = [
 ];
 
 // The "New post" form: a title, a subtitle and whether it is for everyone or only for the user's own departments, sections and clusters.
-const NewPostForm = ({ onDone }: NewPostFormProps) => {
+export default function NewPostForm({ onDone }: NewPostFormProps) {
   const user = useCurrentUser();
-  const addPost = useStore((s) => s.addPost);
+  const addPost = useAddPost();
   const {
     register,
     handleSubmit,
@@ -33,7 +33,7 @@ const NewPostForm = ({ onDone }: NewPostFormProps) => {
   const audience = useWatch({ control, name: "audience" });
 
   // Adds the post to the feed, a groups post is aimed at every group the user is in.
-  const onSubmit = (values: NewPostInput) => {
+  const handleCreatePost = (values: NewPostInput) => {
     addPost({
       author: {
         id: user.id,
@@ -58,7 +58,11 @@ const NewPostForm = ({ onDone }: NewPostFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-sm" noValidate>
+    <form
+      onSubmit={handleSubmit(handleCreatePost)}
+      className="flex flex-col gap-sm"
+      noValidate
+    >
       <CustomInput
         label="Title"
         placeholder="What's it about?"
@@ -68,7 +72,10 @@ const NewPostForm = ({ onDone }: NewPostFormProps) => {
       />
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="subtitle" className="subtitle text-caption font-medium text-foreground/80">
+        <label
+          htmlFor="subtitle"
+          className="subtitle text-caption font-medium text-foreground/80"
+        >
           Subtitle
         </label>
         <CustomTextarea
@@ -81,7 +88,9 @@ const NewPostForm = ({ onDone }: NewPostFormProps) => {
       </div>
 
       <fieldset className="flex flex-col gap-1">
-        <legend className="subtitle mb-1 text-caption font-medium text-foreground/80">Who is it for?</legend>
+        <legend className="subtitle mb-1 text-caption font-medium text-foreground/80">
+          Who is it for?
+        </legend>
         <div className="flex gap-2">
           {AUDIENCE_OPTIONS.map((option) => (
             <label
@@ -93,7 +102,12 @@ const NewPostForm = ({ onDone }: NewPostFormProps) => {
                   : "border-border text-muted-foreground hover:bg-muted",
               )}
             >
-              <input type="radio" value={option.value} className="sr-only" {...register("audience")} />
+              <input
+                type="radio"
+                value={option.value}
+                className="sr-only"
+                {...register("audience")}
+              />
               {option.label}
             </label>
           ))}
@@ -101,15 +115,24 @@ const NewPostForm = ({ onDone }: NewPostFormProps) => {
       </fieldset>
 
       <div className="flex justify-end gap-2">
-        <CustomButton type="button" variant="ghost" size="md" className="title rounded-full" onClick={() => onDone()}>
+        <CustomButton
+          type="button"
+          variant="ghost"
+          size="md"
+          className="title rounded-full"
+          onClick={() => onDone()}
+        >
           Cancel
         </CustomButton>
-        <CustomButton type="submit" variant="primary" size="md" className="title rounded-full">
+        <CustomButton
+          type="submit"
+          variant="primary"
+          size="md"
+          className="title rounded-full"
+        >
           Post
         </CustomButton>
       </div>
     </form>
   );
-};
-
-export default NewPostForm;
+}

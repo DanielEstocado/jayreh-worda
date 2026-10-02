@@ -1,46 +1,91 @@
-import { Sparkles } from "lucide-react";
-import { CustomAppShell } from "@/components";
-import { MOCK_STORE_ITEMS } from "@/constants/store";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useState } from "react";
+import { useStoreItems } from "@/services/queries/store";
+import { useCurrentUser } from "@/services/queries/user";
+import { cn } from "@/lib/cn";
+import type { StoreItem } from "@/types/store";
+import PointsHero from "./components/PointsHero";
 import StoreItemCard from "./components/StoreItemCard";
 
-// The store: the user's points on top, then rewards to spend them on, the ones they can afford first. Design only for now.
-const StoreScreen = () => {
-  const user = useCurrentUser();
-  const items = [...MOCK_STORE_ITEMS].sort(
-    (a, b) =>
-      Number(b.cost <= user.exp) - Number(a.cost <= user.exp) ||
-      a.cost - b.cost,
-  );
+type SectionProps = { title: string; items: StoreItem[]; balance: number };
+
+const ALL = "All";
+
+// A titled grid of rewards, hidden when there are none in it.
+function Section({ title, items, balance }: SectionProps) {
+  if (items.length === 0) return null;
 
   return (
-    <CustomAppShell title="Store">
-      <div className="flex flex-col gap-sm p-sm">
-        <div className="flex items-center gap-sm rounded-2xl border border-highlight/40 bg-highlight/15 p-sm">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-highlight text-amber-950">
-            <Sparkles size={24} />
-          </span>
-          <div>
-            <p className="subtitle text-caption font-medium text-amber-900/75">
-              Your points
-            </p>
-            <p className="title text-h2 leading-tight font-bold text-amber-900">
-              {user.exp.toLocaleString("en-US")} XP
-            </p>
-          </div>
-          <p className="subtitle ml-auto hidden max-w-40 text-right text-caption text-amber-900/75 sm:block">
-            Finish lessons or join activities to earn more and spend them here.
-          </p>
-        </div>
+    <section>
+      <h2 className="title mb-sm text-body-lg font-bold text-foreground">
+        {title} <span className="text-muted-foreground">({items.length})</span>
+      </h2>
+      <div className="grid grid-cols-1 gap-md sm:grid-cols-2">
+        {items.map((item) => (
+          <StoreItemCard key={item.id} item={item} balance={balance} />
+        ))}
+      </div>
+    </section>
+  );
+}
 
-        <div className="grid grid-cols-1 gap-sm sm:grid-cols-2">
-          {items.map((item) => (
-            <StoreItemCard key={item.id} item={item} balance={user.exp} />
+// The store: the user's points and progress to the next reward, category filters, then the rewards they can redeem now and the ones to keep earning for. Design only for now.
+export default function StoreScreen() {
+  const user = useCurrentUser();
+  const [category, setCategory] = useState(ALL);
+
+  const { items: allItems, categories } = useStoreItems();
+
+  const items = allItems.filter(
+    (item) => category === ALL || item.category === category,
+  );
+  const next = allItems.find((item) => item.cost > user.exp);
+
+  return (
+    <>
+      <div className="flex flex-col gap-md p-md">
+        <PointsHero balance={user.exp} next={next} />
+
+        <div
+          role="tablist"
+          aria-label="Categories"
+          className="flex flex-wrap gap-2"
+        >
+          {[ALL, ...categories].map((name) => (
+            <button
+              key={name}
+              type="button"
+              role="tab"
+              aria-selected={name === category}
+              onClick={() => setCategory(name)}
+              className={cn(
+                "title cursor-pointer rounded-full border px-3.5 py-1.5 text-caption font-semibold transition",
+                name === category
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground hover:bg-muted",
+              )}
+            >
+              {name}
+            </button>
           ))}
         </div>
-      </div>
-    </CustomAppShell>
-  );
-};
 
-export default StoreScreen;
+        <Section
+          title="Ready to redeem"
+          items={items.filter((i) => i.cost <= user.exp)}
+          balance={user.exp}
+        />
+        <Section
+          title="Keep earning"
+          items={items.filter((i) => i.cost > user.exp)}
+          balance={user.exp}
+        />
+
+        {items.length === 0 && (
+          <p className="subtitle text-body text-foreground/70">
+            Nothing in this category yet.
+          </p>
+        )}
+      </div>
+    </>
+  );
+}

@@ -10,7 +10,11 @@ type LessonChecklistProps = {
 };
 
 // A searchable, scrollable list of every lesson with a checkbox for done or not done.
-const LessonChecklist = ({ progress, canEdit, onToggle }: LessonChecklistProps) => {
+export default function LessonChecklist({
+  progress,
+  canEdit,
+  onToggle,
+}: LessonChecklistProps) {
   const [query, setQuery] = useState("");
 
   const rows = progress.modules.flatMap((m) =>
@@ -26,7 +30,9 @@ const LessonChecklist = ({ progress, canEdit, onToggle }: LessonChecklistProps) 
   const text = query.trim().toLowerCase();
   const shown = text
     ? rows.filter((r) =>
-        `module ${r.moduleNumber} ${r.moduleTitle} lesson ${r.number} ${r.title}`.toLowerCase().includes(text),
+        `module ${r.moduleNumber} ${r.moduleTitle} lesson ${r.number} ${r.title}`
+          .toLowerCase()
+          .includes(text),
       )
     : rows;
   const doneCount = rows.filter((r) => r.done).length;
@@ -34,7 +40,10 @@ const LessonChecklist = ({ progress, canEdit, onToggle }: LessonChecklistProps) 
   return (
     <div className="flex flex-col gap-2">
       <div className="relative">
-        <Search size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
+        <Search
+          size={16}
+          className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
+        />
         <input
           type="search"
           value={query}
@@ -52,7 +61,9 @@ const LessonChecklist = ({ progress, canEdit, onToggle }: LessonChecklistProps) 
 
       <ul className="max-h-72 divide-y divide-border overflow-y-auto rounded-xl border border-border">
         {shown.length === 0 ? (
-          <li className="subtitle p-sm text-center text-caption text-muted-foreground">No lessons match.</li>
+          <li className="subtitle p-sm text-center text-caption text-muted-foreground">
+            No lessons match.
+          </li>
         ) : (
           shown.map((r) => (
             <li key={r.id}>
@@ -68,7 +79,9 @@ const LessonChecklist = ({ progress, canEdit, onToggle }: LessonChecklistProps) 
                   <span className="subtitle block text-caption text-muted-foreground">
                     Module {r.moduleNumber} · Lesson {r.number}
                   </span>
-                  <span className="subtitle block text-body text-foreground">{r.title}</span>
+                  <span className="subtitle block text-body text-foreground">
+                    {r.title}
+                  </span>
                 </span>
               </label>
             </li>
@@ -77,6 +90,4 @@ const LessonChecklist = ({ progress, canEdit, onToggle }: LessonChecklistProps) 
       </ul>
     </div>
   );
-};
-
-export default LessonChecklist;
+}

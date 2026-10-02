@@ -30,3 +30,10 @@ export type User = {
   memberships: Membership[];
   exp: number;
 };
+
+// The reference lists a membership path is looked up in.
+export type ChurchLists = {
+  departments: Department[];
+  sections: Section[];
+  clusters: Cluster[];
+};

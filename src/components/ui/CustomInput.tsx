@@ -7,12 +7,21 @@ type CustomInputProps = ComponentProps<"input"> & {
 };
 
 // A themed text input with its label on top and a validation message underneath when one is passed in.
-const CustomInput = ({ label, error, id, className, ...props }: CustomInputProps) => {
+export default function CustomInput({
+  label,
+  error,
+  id,
+  className,
+  ...props
+}: CustomInputProps) {
   const inputId = id ?? props.name;
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={inputId} className="subtitle text-caption font-medium text-foreground/80">
+      <label
+        htmlFor={inputId}
+        className="subtitle text-caption font-medium text-foreground/80"
+      >
         {label}
       </label>
       <input
@@ -28,6 +37,4 @@ const CustomInput = ({ label, error, id, className, ...props }: CustomInputProps
       {error && <p className="subtitle text-caption text-error">{error}</p>}
     </div>
   );
-};
-
-export default CustomInput;
+}

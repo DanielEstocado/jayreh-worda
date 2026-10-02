@@ -1,6 +1,6 @@
-import { POST_TAGS } from "@/constants/post";
-import { usePostInteractions } from "@/hooks/usePostInteractions";
-import { formatPostDateTime, getAudienceLabel } from "@/lib/post";
+import { useChurchLabels } from "@/hooks/useChurchLabels";
+import { usePostInteractions } from "@/services/mutations/post";
+import { formatPostDateTime } from "@/lib/post";
 import type { Post } from "@/types/post";
 import CustomPostCard from "./ui/CustomPostCard";
 
@@ -10,11 +10,20 @@ type CustomPostListProps = {
 };
 
 // A list of posts wired to the user's likes and pins, shared by Home and Profile.
-const CustomPostList = ({ posts, emptyMessage }: CustomPostListProps) => {
-  const { isLiked, isPinned, getLikeCount, toggleLike, togglePin } = usePostInteractions();
+export default function CustomPostList({
+  posts,
+  emptyMessage,
+}: CustomPostListProps) {
+  const { audienceLabel, postTagLabels } = useChurchLabels();
+  const { isLiked, isPinned, getLikeCount, toggleLike, togglePin } =
+    usePostInteractions();
 
   if (posts.length === 0) {
-    return <p className="subtitle p-md text-center text-body text-muted-foreground">{emptyMessage}</p>;
+    return (
+      <p className="subtitle p-md text-center text-body text-muted-foreground">
+        {emptyMessage}
+      </p>
+    );
   }
 
   return (
@@ -23,8 +32,8 @@ const CustomPostList = ({ posts, emptyMessage }: CustomPostListProps) => {
         <CustomPostCard
           key={post.id}
           post={post}
-          tagLabels={post.tagIds.flatMap((id) => POST_TAGS.find((t) => t.id === id)?.label ?? [])}
-          audienceLabel={getAudienceLabel(post.audience)}
+          tagLabels={postTagLabels(post)}
+          audienceLabel={audienceLabel(post.audience)}
           dateTime={formatPostDateTime(post.createdAt)}
           likeCount={getLikeCount(post)}
           liked={isLiked(post.id)}
@@ -35,6 +44,4 @@ const CustomPostList = ({ posts, emptyMessage }: CustomPostListProps) => {
       ))}
     </div>
   );
-};
-
-export default CustomPostList;
+}

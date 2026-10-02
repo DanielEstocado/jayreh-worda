@@ -2,7 +2,10 @@ import type { ActivityProgress } from "@/types/activity";
 import type { User } from "@/types/church";
 
 // Just enough of a user to show who runs a group, the way an API embeds it.
-export type GroupMentor = Pick<User, "id" | "firstName" | "lastName" | "avatarUrl">;
+export type GroupMentor = Pick<
+  User,
+  "id" | "firstName" | "lastName" | "avatarUrl"
+>;
 
 // A mentor's group for one activity (C2S), mentees are enrolled into it. Only its mentor can edit it.
 export type Group = {
@@ -31,7 +34,7 @@ export type Mentee = {
   joinedAt: string;
 };
 
-// A lesson the mentor recorded as done for one mentee, per mentee because members miss sessions.
+// A lesson the mentor recorded as done for one mentee, per mentee because mentees miss sessions.
 export type MenteeCompletion = {
   menteeId: number;
   lessonId: number;
@@ -39,8 +42,18 @@ export type MenteeCompletion = {
 };
 
 // A mentee in a group with how far along they are and whether that mentee is the signed-in user.
-export type GroupMember = {
+export type GroupMentee = {
   mentee: Mentee;
   isMe: boolean;
   progress: ActivityProgress;
+};
+
+// One group the signed-in user is in, with the numbers its card shows.
+export type MyGroup = {
+  group: Group;
+  role: GroupRole;
+  activityLabel: string;
+  menteeCount: number;
+  // Average progress of the group's mentees, 0 to 100.
+  averagePercent: number;
 };
